@@ -1,0 +1,72 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+<div class="alert alert-light alert-dismissible fade show text-center h3" role="alert">
+    {{ detail.title }} 
+  </div>
+  {% if content %}
+    <div id ="page-content" class="card-text h5">
+      {% for item in content %}
+        {% if item.sentence.chapter %}
+          <div id="sentence" data-index="{{ item.sentence.id }}" class="text-center h3">{{ item.sentence.sentence_english }} </div>
+        {% elif  item.sentence.chapterName %}
+          <div id="sentence" data-index="{{ item.sentence.id }}" class="text-center h3">{{ item.sentence.sentence_english }} </div><br/>
+        {% else  %}
+          <span id="sentence" data-index="{{ item.sentence.id }}" class="display-5">
+            {% for itemWord in item.words %}
+            <span id="word" data-page-index="{{ forloop.counter0 }}">
+              {{ itemWord }} 
+            </span>
+            {% endfor %}
+          </span>
+        {% endif %}
+      {% endfor %}
+    </div>
+    {% else  %}
+    <p>{{ inf }}</p>
+  {% endif %}
+
+  <div style="display: none" id="translate-word" class="fixed-top h6 bg-white border border-5">
+  </div>
+  <div style="display: none" id="translate" class="fixed-bottom text-center h3 bg-white border border-5">
+  </div>
+
+
+{% endblock %}
+
+{% block js %}
+  {% load static %}
+    <script type="text/javascript" src={% static "js/main261111.js" %}></script>
+{% endblock %}
+
+{% block pagination_detail %}
+  <ul class="pagination pagination-md flex-wrap justify-content-center">
+    <hr />
+    <li class="page-item">
+      {% if previous %}
+        <a href="{% url url_word detail.id previous.page  %}" class="page-link">{{previous.page}}</a>
+      {% endif %}
+    </li>
+    <li class="page-item disabled" aria-current="page">
+      <div class="dropdown">
+        <button class="btn btn-secondary btn-sm dropdown-toggle" type="button" id="dropdownMenuButtonSM" data-bs-toggle="dropdown" aria-expanded="false">
+          {{ detail.title}} 
+        </button>
+        <ul class="dropdown-menu" aria-labelledby="dropdownMenuButtonSM" style="">
+          {% if pages %}
+            <div class="card-text h5">
+              {% for item in pages %}
+              <li><a class="dropdown-item" href="{% url url_word  detail.id item.page %}">{{item.page}}</a></li>
+              {% endfor %}
+            </div>
+          {% endif %}
+       </ul>
+      </div>
+    </li>
+    <li class="page-item">
+      {% if next %}
+        <a class="page-link" href="{% url url_word  detail.id next.page %}">{{next.page }}</a>
+      {% endif %}
+    </li>
+  </ul>
+{% endblock %}

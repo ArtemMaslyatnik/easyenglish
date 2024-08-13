@@ -1,0 +1,56 @@
+{% extends 'base_generic.html' %}
+
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href={% url 'ee:index' %}>Главная</a></li>
+        {% block crumbs %}
+          {% if title %} 
+          <li class="breadcrumb-item"><a href="{% url url_list %}">{{title}}</a></li>
+          <li class="breadcrumb-item active" aria-current="page">{{detail.english}}</li>
+          {% endif %}
+        {% endblock %}
+      </ol>
+    </nav>
+{% endblock %}
+
+{% block addWordbook %}
+  {% if user.is_authenticated %}
+    <form id="create-wordbook" method="post"> 
+      <input type="hidden" id="url-wordbook" data-url="{% url 'ee:create_wordbook' detail.pk %}"  value="{% url url_create_word detail.pk %}"
+       name="path"/>
+      {% csrf_token %}
+      {% if wordbook %}
+        <button id="removeWordbook" type="submit" class="btn btn-outline-danger">словарь -</button>
+        <button id="insertWordbook" type="submit" class="btn btn-outline-success" style="display: none;">словарь +</button>
+      {% else %}
+        <button id="insertWordbook" type="submit" class="btn btn-outline-success">словарь +</button>
+        <button id="removeWordbook" type="submit" class="btn btn-outline-danger" style="display: none;">словарь -</button>
+      {% endif %}
+    </form>
+  {% endif %}
+{% endblock %}
+
+{% block js %}
+  {% load static %}
+    <script type="text/javascript" src={% static "js/main.js" %}></script>
+{% endblock %}
+
+{% block pagination_detail %}
+  <ul class="pagination pagination-md flex-wrap justify-content-center">
+    <hr />
+    <li class="page-item">
+      {% if previous %}
+        <a href="{% url url_word previous.id  %}" class="page-link">предыдущая</a>
+      {% endif %}
+    </li>
+    <li class="page-item disabled" aria-current="page">
+      <a class="page-link" href="#">{{ detail.english.name }}</a>
+    </li>
+    <li class="page-item">
+      {% if next %}
+        <a class="page-link" href="{% url url_word  next.id %}">следующая</a>
+      {% endif %}
+    </li>
+  </ul>
+{% endblock %}

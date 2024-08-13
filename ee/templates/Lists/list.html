@@ -1,0 +1,55 @@
+{% extends 'base_generic.html' %}
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href={% url 'ee:index' %}>Главная</a></li>
+        {% block crumbs %}
+          {% if title %} 
+            <li class="breadcrumb-item">{{ title }}</a></li>
+          {% endif %}
+        {% endblock %}
+      </ol>
+    </nav>
+{% endblock %}
+
+
+
+
+{% block content %}
+  <div class="alert alert-success alert-dismissible fade show mt-5" role="alert">
+    {{ title }} 
+  </div>
+  {% if list %}
+    <div class="list-group">
+      {% for item in list %}
+        <a href="{% url url_word item.pk %}" class="list-group-item list-group-item-action list-group-item-light">{{ item.pk  }}. {{ item.english.name  }} </a>
+      {% endfor %}
+    </div>
+    {% else  %}
+    <p>{{ inf }}</p>
+    {% endif %}
+{% endblock %}
+
+{% block pagination %}
+    <ul class="pagination pagination-md flex-wrap justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1" tabindex="-1" aria-disabled="true">первая</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}" tabindex="-1" aria-disabled="true">предыдущая</a>
+        </li>
+      {% endif %}
+      <li class="page-item disabled" aria-current="page">
+        <a class="page-link" href="#">страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</a>
+      </li>
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">следующая</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">последняя</a>
+        </li>
+      {% endif %}
+    </ul>
+  {% endblock %}

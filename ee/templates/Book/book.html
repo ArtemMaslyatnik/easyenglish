@@ -1,0 +1,74 @@
+{% extends 'base_generic.html' %}
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href="{% url 'ee:index' %}">Главная</a></li>
+        {% block crumbs %}
+          {% if title %} 
+            <li class="breadcrumb-item">{{ title }}</a></li>
+          {% endif %}
+        {% endblock %}
+      </ol>
+    </nav>
+{% endblock %}
+
+
+
+
+{% block content %}
+  <div class="alert alert-light alert-dismissible fade show" role="alert">
+    {{ title }} 
+  </div>
+  {% if list %}
+     {% for item in list %}
+     <div class="row">
+      <div class="col-md-12">
+        <div class="row g-0 border rounded overflow-hidden flex-md-row mb-4 shadow-sm h-md-250 position-relative">
+          <div class="col p-4 d-flex flex-column position-static">
+            <strong class="d-inline-block mb-2 text-primary-emphasis">{{item.level}}</strong>
+            <h3 class="mb-0">{{item.title}}</h3>
+            <p class="card-text mb-auto">{{item.description}}</p>
+            <div class="mb-1 ">Уникальных слов: <span class="h5">{{item.unique_words}}</span></div>
+            <div class="mb-1 ">Всего слов: <span class="h5">{{item.total_words}}</span></div>
+            {% comment %} <a href="{% url url_book item.pk %}" class="icon-link gap-1 icon-link-hover stretched-link"> {% endcomment %}
+              <a href="{% url url_book item.pk item.pk %}" class="icon-link gap-1 icon-link-hover stretched-link">
+              Continue reading
+              <svg class="bi"><use xlink:href="#chevron-right"></use></svg>
+            </a>
+          </div>
+          <div class="col-auto d-none d-lg-block">
+            <svg class="bd-placeholder-img" width="200" height="250" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="Placeholder: Thumbnail" preserveAspectRatio="xMidYMid slice" focusable="false"><title>Placeholder</title><rect width="100%" height="100%" fill="#55595c"></rect><text x="50%" y="50%" fill="#eceeef" dy=".3em">Thumbnail</text></svg>
+          </div>
+        </div>
+      </div>
+    </div>
+    {% endfor %}
+
+    {% else  %}
+    <p>{{ inf }}</p>
+    {% endif %}
+{% endblock %}
+
+{% block pagination %}
+    <ul class="pagination pagination-md flex-wrap justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1" tabindex="-1" aria-disabled="true">первая</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}" tabindex="-1" aria-disabled="true">предыдущая</a>
+        </li>
+      {% endif %}
+      <li class="page-item disabled" aria-current="page">
+        <a class="page-link" href="#">страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</a>
+      </li>
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">следующая</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">последняя</a>
+        </li>
+      {% endif %}
+    </ul>
+  {% endblock %}

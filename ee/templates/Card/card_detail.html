@@ -1,0 +1,194 @@
+{% extends 'form.html' %}
+
+{% block content %}
+  <h1>{{ detail.english.name }}</h1>
+  <div class="bd-example-snippet bd-code-snippet">
+    <div class="bd-example m-0 border-0">
+      <nav>
+        <div class="nav nav-tabs mb-3" id="nav-tab" role="tablist">
+          <button class="nav-link active" id="nav-home-tab" data-bs-toggle="tab" data-bs-target="#nav-home" type="button" role="tab" aria-controls="nav-home" aria-selected="true">Родственные словоформы</button>
+          {% if adverb_list %}
+            <button class="nav-link" id="nav-adverb-tab" data-bs-toggle="tab" data-bs-target="#nav-adverb" type="button" role="tab" aria-controls="nav-adverb" aria-selected="false" tabindex="-1">Наречия</button>
+          {% endif %}
+          {% if adjective_list %}
+            <button class="nav-link" id="nav-adjective-tab" data-bs-toggle="tab" data-bs-target="#nav-adjective" type="button" role="tab" aria-controls="nav-adjective" aria-selected="false" tabindex="-1">Прилогательные</button>
+          {% endif %}
+          {% if verb_list %}
+            <button class="nav-link" id="nav-verb-tab" data-bs-toggle="tab" data-bs-target="#nav-verb" type="button" role="tab" aria-controls="nav-verb" aria-selected="false" tabindex="-1">Глаголы</button>
+          {% endif %}
+          {% if noun_list %}
+            <button class="nav-link" id="nav-noun-tab" data-bs-toggle="tab" data-bs-target="#nav-noun" type="button" role="tab" aria-controls="nav-noun" aria-selected="false" tabindex="-1">Существительные</button>
+          {% endif %}
+          {% if conjunction_list %}
+            <button class="nav-link" id="nav-conjunction-tab" data-bs-toggle="tab" data-bs-target="#nav-conjunction" type="button" role="tab" aria-controls="nav-conjunction" aria-selected="false" tabindex="-1">Союзы</button>
+          {% endif %}
+          {% if preposition_list %}
+            <button class="nav-link" id="nav-preposition-tab" data-bs-toggle="tab" data-bs-target="#nav-preposition" type="button" role="tab" aria-controls="nav-preposition" aria-selected="false" tabindex="-1">Предлоги</button>
+          {% endif %}
+          {% if pronoun_list %}
+            <button class="nav-link" id="nav-pronoun-tab" data-bs-toggle="tab" data-bs-target="#nav-pronoun" type="button" role="tab" aria-controls="nav-pronoun" aria-selected="false" tabindex="-1">Местоимения</button>
+          {% endif %}
+        </div>
+      </nav>
+      <div class="tab-content" id="nav-tabContent">
+        <div class="tab-pane fade active show" id="nav-home" role="tabpanel" aria-labelledby="nav-home-tab">
+          {% if related_list %}
+            <div class="list-group">
+              {% for item in related_list %}
+                <a href="#" class="list-group-item list-group-item-action">{{ item.relate_english_word.name }}</a>
+              {% endfor %}
+            </div>
+          {% else %}
+            <div class="list-group">
+              <a href="#" class="list-group-item list-group-item-action">Нет родственных словоформ</a>
+            </div>
+          {% endif %}
+        </div>
+        <div class="tab-pane fade" id="nav-adverb" role="tabpanel" aria-labelledby="nav-adverb-tab">
+          <!-- adverb -->
+          {% if adverb_list %}
+            <div class="list-group">
+              {% for item in adverb_list %}
+                <a href="#" class="list-group-item list-group-item-action list-group-item-warning">{{ item.russian.name }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="tab-pane fade" id="nav-adjective" role="tabpanel" aria-labelledby="nav-adjective-tab">
+          <!-- adjective -->
+          {% if adjective_list %}
+            <div class="list-group">
+              {% for item in adjective_list %}
+                <a href="#" class="list-group-item list-group-item-action list-group-item-danger">{{ item.russian.name }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="tab-pane fade" id="nav-verb" role="tabpanel" aria-labelledby="nav-verb-tab">
+          <!-- verb -->
+          {% if verb_list %}
+            <div class="list-group">
+              {% for item in verb_list %}
+                <a href="#" class="list-group-item list-group-item-action list-group-item-success">{{ item.russian.name }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="tab-pane fade" id="nav-noun" role="tabpanel" aria-labelledby="nav-noun-tab">
+          <!-- noun -->
+          {% if noun_list %}
+            <div class="list-group">
+              {% for item in noun_list %}
+                <a href="#" class="list-group-item list-group-item-action list-group-item-primary">{{ item.russian.name }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="tab-pane fade" id="nav-conjunction" role="tabpanel" aria-labelledby="nav-conjunction-tab">
+          <!-- conjunction -->
+          {% if conjunction_list %}
+            <div class="list-group">
+              {% for item in conjunction_list %}
+                <a href="#" class="list-group-item list-group-item-action list-group-item-light">{{ item.russian.name }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="tab-pane fade" id="nav-preposition" role="tabpanel" aria-labelledby="nav-preposition-tab">
+          <!-- preposition -->
+          {% if preposition_list %}
+            <div class="list-group">
+              {% for item in preposition_list %}
+                <a href="#" class="list-group-item list-group-item-action list-group-item-light">{{ item.russian.name }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+        <div class="tab-pane fade" id="nav-pronoun" role="tabpanel" aria-labelledby="nav-pronoun-tab">
+          <!-- pronoun -->
+          {% if pronoun_list %}
+            <div class="list-group">
+              {% for item in pronoun_list %}
+                <a href="#" class="list-group-item list-group-item-action list-group-item-secondary">{{ item.russian.name }}</a>
+              {% endfor %}
+            </div>
+          {% endif %}
+        </div>
+      </div>
+    </div>
+  </div>
+{% endblock %}
+
+{% block comments %}
+  <section class="gradient-custom">
+    <div class="container my-5 py-5">
+      <div class="row d-flex justify-content-center">
+        <div class="col-md-12 col-lg-10 col-xl-8">
+          <div class="card">
+            <div id="comments" class="card-body p-4">
+              <form id="create-comment" method="post" >
+                <input type="hidden" id="url-comment" data-url="{% url 'ee:create_comment' detail.pk %}" />
+                <input type="hidden" name="parent-comment" value="{{detail.english.id}}"/>
+                {% csrf_token %}
+                <textarea id="textarea-comment" name="text" class="form-control" aria-label="With textarea"></textarea>
+                <button type="submit" class="btn btn-outline-primary mt-1">Отправить</button>
+               </form>
+              <h4 class="text-center mb-4 pb-2">Коментарии</h4>
+              {% if comments %}
+                {% for item in comments %}
+                  <div class="row">
+                      <div class="col">
+                        <div class="d-flex flex-start">
+                          <img class="rounded-circle shadow-1-strong me-3"
+                            src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp" alt="avatar" width="65"
+                            height="65" />
+                          <div class="flex-grow-1 flex-shrink-1">
+                            <div id="comment-parent-{{item.id}}">
+                              <div class="d-flex justify-content-between align-items-center">
+                                <p class="mb-1">
+                                  {{item.user}}<span class="small"> {{item.created|date:"d.m.y" }}</span>
+                                </p>
+                                <a href="#" class ="sub-comment-link" id="sub-comment-{{item.id}}"><i class="fas fa-reply fa-xs"></i><span class="small"> reply</span></a>
+                              </div>
+                              <p class="small mb-0">
+                                {{ item.text }}
+                              </p>
+                            </div>
+                            {% if item.subComment %}
+                            {% for item in item.subComment %}
+                              <div class="d-flex flex-start mt-4">
+                                <a class="me-3" href="#">
+                                  <img class="rounded-circle shadow-1-strong"
+                                    src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(11).webp" alt="avatar"
+                                    width="65" height="65" />
+                                </a>
+                                <div class="flex-grow-1 flex-shrink-1">
+                                  <div>
+                                    <div class="d-flex justify-content-between align-items-center">
+                                      <p class="mb-1">
+                                        {{item.user}}<span class="small"> {{item.created|date:"d.m.y" }}</span>
+                                      </p>
+                                    </div>
+                                    <p class="small mb-0">
+                                      {{item.text}}
+                                    </p>
+                                  </div>
+                                </div>
+                              </div>
+                            {% endfor %}
+                            {% endif %}
+                          </div>
+                        </div>
+                      </div>
+                  </div>
+                {% endfor %}
+              {% endif %}
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+
+{% endblock %}
