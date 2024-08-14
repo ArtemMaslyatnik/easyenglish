@@ -30,7 +30,7 @@ def get_content(request):
     count = 0
     for obj in models.English.objects.all():
         count += 1
-        if count > 100:
+        if count > 200:
             break
         page = "https://wooordhunt.ru/word/" + obj.name
         req = requests.get(page, headers)
