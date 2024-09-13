@@ -21,6 +21,10 @@ urlpatterns = [
          views.import_from_excel,
          name='import_from_excel'
          ),
+    path('export/',
+         views.export_excel,
+         name='export_excel'
+         ),
     path("upload-file/",
          views.upload_file,
          name="upload-file"),

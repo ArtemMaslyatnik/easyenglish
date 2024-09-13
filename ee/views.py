@@ -28,9 +28,10 @@ def get_content(request):
     }
     # отправляем запрос с заголовками по нужному адресу
     count = 0
-    for obj in models.English.objects.all():
+    queryset = models.English.objects.all().filter(id__gt=2701)
+    for obj in queryset:
         count += 1
-        if count > 200:
+        if count > 500:
             break
         page = "https://wooordhunt.ru/word/" + obj.name
         req = requests.get(page, headers)
@@ -51,14 +52,25 @@ def get_content(request):
         audio_usa = soup.find(id="audio_us_s")
         if audio_usa is None:
             audio_usa = soup.find(id="audio_us")
-            tr_script_use = audio_usa.previous_sibling.previous_sibling.text
+            if audio_usa is None:
+                audio_usa = soup.find(id="audio_us_1")
+                tr_script_use = audio_usa.previous_sibling.previous_sibling.text
+            else:
+                tr_script_use = audio_usa.previous_sibling.previous_sibling.text
         else:
             tr_script_use = audio_usa.previous_sibling.previous_sibling.text
 
         audio_eng = soup.find(id="audio_uk_s")
         if audio_eng is None:
             audio_eng = soup.find(id="audio_uk")
-            tr_script_eng = audio_eng.previous_sibling.previous_sibling.text
+            if audio_eng is None:
+                audio_eng = soup.find(id="audio_uk_1")
+                try:
+                    tr_script_eng = audio_eng.previous_sibling.previous_sibling.text
+                except Exception:
+                    tr_script_eng = 'NO'
+            else:
+                tr_script_eng = audio_eng.previous_sibling.previous_sibling.text
         else:
             tr_script_eng = audio_eng.previous_sibling.previous_sibling.text
 
@@ -239,6 +251,31 @@ def import_from_excel(request):
         df = pd.read_excel(excel_file)
         processdf(df)
         # processdfEngRW(df)
+
+    return render(request, 'import_success.html')
+
+
+def export_excel(request):
+    # create DataFrame
+    query_text = ('SELECT serv.english, dic.name,  dic.id'
+                  ' FROM ee_serv AS serv'
+                        ' RIGHT JOIN ee_english AS dic'
+                            ' ON lower(serv.english)  = dic.name'
+                  ' WHERE serv.english IS NULL'
+                  ' GROUP BY serv.english, dic.name, dic.id'
+                  ' ORDER BY "english" desc'
+                  ' LIMIT 100')
+
+    english_list = []
+    name_list = []
+    id_list = []
+    for obj in models.English.objects.raw(query_text):
+        english_list.append(obj.english)
+        name_list.append(obj.name)
+        id_list.append(obj.id)
+    dic = {'english': english_list, 'name': name_list, 'id': id_list}
+    df = pd.DataFrame(dic)
+    df.to_excel(r'C:\Users\lykov\Documents\mydata.xlsx')
 
     return render(request, 'import_success.html')
 
