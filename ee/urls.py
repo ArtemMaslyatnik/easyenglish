@@ -13,6 +13,10 @@ urlpatterns = [
          views.index,
          name='index'
          ),
+    path('universal/',
+         views.universal,
+         name='universal'
+         ),
     path('content/',
          views.get_content,
          name='get_content'
@@ -24,6 +28,10 @@ urlpatterns = [
     path('export/',
          views.export_excel,
          name='export_excel'
+         ),
+    path('alter/',
+         views.alter_dic,
+         name='alter_dic'
          ),
     path("upload-file/",
          views.upload_file,
@@ -114,4 +122,11 @@ urlpatterns = [
          views.VerbCardDetailView.as_view(),
          name='verb_card_detail'
          ),
+    # test
+    path('english/',
+         views.EnglishListView.as_view(),
+         name='english_list'
+         ),
 ]
+
+

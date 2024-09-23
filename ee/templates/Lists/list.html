@@ -22,7 +22,13 @@
   {% if list %}
     <div class="list-group">
       {% for item in list %}
-        <a href="{% url url_word item.pk %}" class="list-group-item list-group-item-action list-group-item-light">{{ item.pk  }}. {{ item.english.name  }} </a>
+        <a href="{% url url_word item.pk %}" class="list-group-item list-group-item-action list-group-item-light">
+          {{ item.pk  }}. {{ item.english  }}  {{ item.english.transcription  }} 
+          {% load static %}
+          <audio controls src="{% static  item.english.sound_path %}"  type="audio/mpeg"></audio>
+        </a>
+      {% endfor %}
+      {% for item in data %}
       {% endfor %}
     </div>
     {% else  %}

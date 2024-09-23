@@ -16,6 +16,16 @@ from ee.forms import UploadFileForm
 from django.core.serializers import serialize
 
 
+def universal(request):
+    for obj in models.English.objects.all():
+        if obj.sound_path.name.find('audio') >= 0:
+            sound_path = obj.sound_path.name
+            new_sound_path = sound_path.replace('audio', 'media')
+            models.English.objects.all().filter(pk=obj.id).update(sound_path=new_sound_path)
+
+    return render(request, 'import_success.html')
+
+
 def get_content(request):
     st_accept = "text/html"  # говорим веб-серверу,
     # что хотим получить html
@@ -31,7 +41,7 @@ def get_content(request):
     queryset = models.English.objects.all().filter(id__gt=2701)
     for obj in queryset:
         count += 1
-        if count > 500:
+        if count > 1:
             break
         page = "https://wooordhunt.ru/word/" + obj.name
         req = requests.get(page, headers)
@@ -244,6 +254,23 @@ def get_content(request):
     return render(request, 'import_success.html')
 
 
+def alter_dic(request):
+    query_text = (' SELECT 1 as id, serv.english, dic.name,  serv.transcription_use, serv.sound_path, serv.sound_path'
+                  ' FROM ee_serv AS serv'
+                       ' RIGHT JOIN ee_english AS dic'
+                       ' ON lower(serv.english)  = dic.name'
+                  ' GROUP BY  serv.english,dic.name, serv.transcription_use, serv.sound_path'
+                  ' ORDER BY "english"')
+
+    for obj in models.English.objects.raw(query_text):
+        find_obj = models.English.objects.all().filter(name=obj.name)
+        transcription = "" if obj.transcription_use is None else obj.transcription_use 
+        sound_path = "" if obj.sound_path is None else obj.sound_path
+        find_obj.update(transcription=transcription, sound_path=sound_path)
+
+    return render(request, 'import_success.html')
+
+
 def import_from_excel(request):
     if request.method == 'POST':
         excel_file = request.FILES['excel_file']
@@ -432,11 +459,39 @@ def index(request):
     )
 
 
-# Adjective
-class AdjectiveCardListView(generic.ListView):
+# English
+class EnglishListView(generic.ListView):
     template_name = 'Lists/list.html'
     context_object_name = 'list'
-    model = models.AdjectiveCard
+    model = models.English
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(EnglishListView, self).get_context_data(**kwargs)
+
+        context['title'] = 'Прилагательные'
+        context['inf'] = 'Нет слов'
+        context['url_word'] = 'ee:adjective_card_detail'
+        return context
+
+
+# Adjective
+class AdjectiveCardListView(generic.ListView):
+    query_text = ('SELECT  row_number() OVER(ORDER BY card_id) number_row,'
+                           ' card_id, ee_english.name, NULL rus_id, NULL rus'
+                    ' FROM ee_adjective'
+                    ' LEFT JOIN ee_english ON card_id = ee_english.id'
+                    ' GROUP BY card_id, ee_english.name'
+                    ' UNION SELECT NULL, card_id,  NULL, russian_id, ee_russian.name'
+                    ' FROM ee_adjective'
+                    ' LEFT JOIN ee_russian ON russian_id = ee_russian.id'
+                    ' ORDER BY card_id, number_row')
+
+    template_name = 'Lists/list.html'
+    context_object_name = 'list'
+    model = models.Adjective
     paginate_by = 10
 
     def get_context_data(self, **kwargs):
@@ -447,6 +502,7 @@ class AdjectiveCardListView(generic.ListView):
         context['title'] = 'Прилагательные'
         context['inf'] = 'Нет слов'
         context['url_word'] = 'ee:adjective_card_detail'
+        context['data'] = models.Adjective.objects.raw(self.query_text)
         return context
 
 
@@ -809,24 +865,24 @@ class CardDetailView(generic.DetailView):
     template_name = 'Card/card_detail.html'
     model = models.Card
     context_object_name = 'detail'
-    textSQlComment = ('SELECT '
-                      '1 as id, '
-                      't1.text AS text1, '
-                      't1.created AS created1, '
-                      't1.active AS active1, '
-                      't1.english_id AS english1, '
-                      'au1.username AS user1, '
-                      't2.text AS text2, '
-                      't2.created AS created2, '
-                      't2.active AS active2, '
-                      'au2.username AS user2 '
-                      'FROM '
-                      'ee_comment AS t1 '
-                      'LEFT JOIN ee_comment AS t2 ON t2.parent_id = t1.id '
-                      'LEFT JOIN auth_user AS au1 ON au1.id = t1.user_id '
-                      'LEFT JOIN auth_user AS au2 ON au2.id = t2.user_id '
-                      'WHERE t1.english_id = 1 '
-                      )
+    # textSQlComment = ('SELECT '
+    #                  '1 as id, '
+    #                  't1.text AS text1, '
+    #                  't1.created AS created1, '
+    #                  't1.active AS active1, '
+    #                  't1.english_id AS english1, '
+    #                  'au1.username AS user1, '
+    #                  't2.text AS text2, '
+    #                  't2.created AS created2, '
+    #                  't2.active AS active2, '
+    #                  'au2.username AS user2 '
+    #                  'FROM '
+    #                  'ee_comment AS t1 '
+    #                  'LEFT JOIN ee_comment AS t2 ON t2.parent_id = t1.id '
+    #                  'LEFT JOIN auth_user AS au1 ON au1.id = t1.user_id '
+    #                  'LEFT JOIN auth_user AS au2 ON au2.id = t2.user_id '
+    #                  'WHERE t1.english_id = 1 '
+    #                  )
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context

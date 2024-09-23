@@ -17,6 +17,8 @@ class English(models.Model):
     id = models.SmallAutoField
     name = models.CharField(max_length=30, blank=True, default='')
     ngsl_number = models.SmallIntegerField()
+    transcription = models.CharField(max_length=30, blank=True, default='')
+    sound_path = models.FileField(upload_to='media/')
 
     def __str__(self):
         """

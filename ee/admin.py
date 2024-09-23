@@ -1,5 +1,5 @@
 from django.contrib import admin
-from ee.models import AdjectiveCard, Card, Russian, Verb, Adjective, VerbCard
+from ee.models import AdjectiveCard, Card, Russian, Verb, Adjective, VerbCard, English
 
 
 @admin.register(Russian)
@@ -42,3 +42,9 @@ class AdjectiveCardAdmin(admin.ModelAdmin):
 class CardAdmin(admin.ModelAdmin):
     list_display = ('id', 'english')
     inlines = [VerbInline, AdjectivInline]
+
+
+# English
+@admin.register(English)
+class EnglishAdmin(admin.ModelAdmin):
+    list_display = ('id', 'name')

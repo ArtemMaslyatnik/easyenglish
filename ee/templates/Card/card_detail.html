@@ -2,6 +2,8 @@
 
 {% block content %}
   <h1>{{ detail.english.name }}</h1>
+    {% load static %}
+  <audio controls src="{% static  detail.english.sound_path %}"  type="audio/mpeg"></audio>
   <div class="bd-example-snippet bd-code-snippet">
     <div class="bd-example m-0 border-0">
       <nav>
