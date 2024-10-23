@@ -16,6 +16,623 @@ from ee.forms import UploadFileForm
 from django.core.serializers import serialize
 
 
+# Create your views here.
+def index(request):
+    """
+    Функция отображения для домашней страницы сайта.
+    """
+    # Number of visits to this view, as counted in the session variable.
+    num_visits = request.session.get('num_visits', 0)
+    request.session['num_visits'] = num_visits+1
+
+    # Отрисовка HTML-шаблона index.html с данными внутри
+    # переменной контекста context
+    return render(
+        request,
+        'index.html',
+    )
+
+
+# English
+class EnglishWordListView(generic.ListView):
+    query_text = ('SELECT *, (SELECT english_id FROM ee_wordbook '
+                  ' WHERE ee_wordbook.english_id = ee_english.id '
+                  ' AND ee_wordbook.user_id = %s) AS word '
+                  ' FROM ee_english '
+                  ' ORDER BY id ')
+
+    template_name = 'Lists/list.html'
+    context_object_name = 'list_english'
+    model = models.English
+    paginate_by = 20
+
+    def get_queryset(self, **kwargs):
+        qs = super().get_queryset(**kwargs)
+        return qs.raw(self.query_text, [self.request.user.id])
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(EnglishWordListView, self).get_context_data(**kwargs)
+
+        context['title'] = 'Слова по релевантности'
+        context['url_word'] = 'ee:word_detail'
+        context['url_create_word'] = 'ee:create_wordbook'
+        context['inf'] = 'Нет слов'
+        return context
+
+
+# English word
+class WordDetailView(generic.DetailView):
+    template_name = 'Word/word_detail.html'
+    model = models.English
+    context_object_name = 'detail'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet
+        context.update({
+            'adjective_list': models.Adjective.objects.all().filter(
+                english=self.object),
+            'adverb_list': models.Adverb.objects.all().filter(
+                english=self.object),
+            'conjunction_list': models.Conjunction.objects.all().filter(
+                english=self.object),
+            'fpos_list': models.Fpos.objects.all().filter(
+                english=self.object),
+            'noun_list': models.Noun.objects.all().filter(
+                english=self.object),
+            'preposition_list': models.Preposition.objects.all().filter(
+                english=self.object),
+            'pronoun_list': models.Pronoun.objects.all().filter(
+                english=self.object),
+            'related_list': models.RelatedWord.objects.all().filter(
+                english=self.object),
+            'verb_list': models.Verb.objects.all().filter(
+                english=self.object),
+            'wordbook': models.Wordbook.objects.all().filter(
+                english=self.object,
+                user_id=self.request.user.id),
+            'comments': self.getComments(),
+            'next': models.English.objects.all().filter(
+                id__gt=self.object.id
+            ).order_by('id').first(),
+            'previous': models.English.objects.all().filter(
+                id__lt=self.object.id
+            ).order_by('id').last(),
+        })
+        context['title'] = 'Слова по релевантности'
+        context['url_list'] = 'ee:english_words'
+        context['url_word'] = 'ee:word_detail'
+        context['url_create_word'] = 'ee:create_wordbook'
+        return context
+
+    def getComments(self):
+        SetComments = models.Comment.objects.all().filter(
+            english=self.object
+        )
+        listComment = []
+        for item in SetComments:
+            strComment = {'id': item.id,
+                          'text': item.text,
+                          'user': item.user,
+                          'created': item.created,
+                          'active': item.active,
+                          'subComment': models.Comment.objects.all().filter(
+                              parent_id=item.id
+                          )
+                          }
+            listComment.append(strComment)
+        return listComment
+
+
+# Adjective
+class AdjectiveListView(generic.ListView):
+
+    query_text = ('SELECT 1 id, row_number() OVER(ORDER BY english_id) '
+                  ' number_row, english_id, eng.name, NULL rus_id, '
+                  ' NULL rus, eng.transcription, eng.sound_path, '
+                  ' (SELECT english_id FROM ee_wordbook '
+                  ' WHERE ee_wordbook.english_id = ee_adjective.english_id '
+                  ' AND ee_wordbook.user_id = %s) AS word '
+                  ' FROM ee_adjective '
+                  ' LEFT JOIN ee_english eng ON english_id = eng.id'
+                  ' GROUP BY english_id, eng.name , eng.transcription, '
+                  ' eng.sound_path'
+                  ' UNION SELECT 1, NULL, english_id,  NULL, russian_id, '
+                  '     ee_russian.name, NULL, NULL, NULL'
+                  ' FROM ee_adjective'
+                  ' LEFT JOIN ee_russian ON russian_id = ee_russian.id'
+                  ' ORDER BY english_id, number_row')
+
+    template_name = 'Lists/list.html'
+    context_object_name = 'list'
+    model = models.Adjective
+    paginate_by = 40
+
+    def get_queryset(self, **kwargs):
+        qs = super().get_queryset(**kwargs)
+        return qs.raw(self.query_text, [self.request.user.id])
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(AdjectiveListView, self).get_context_data(**kwargs)
+
+        context['title'] = 'Прилагательные'
+        context['inf'] = 'Нет слов'
+
+        return context
+
+
+# Adverb
+class AdverbListView(generic.ListView):
+
+    query_text = ('SELECT 1 id, row_number() OVER(ORDER BY english_id) '
+                  ' number_row, english_id, eng.name, NULL rus_id, NULL rus, '
+                  ' eng.transcription, eng.sound_path, '
+                  ' (SELECT english_id FROM ee_wordbook '
+                  ' WHERE ee_wordbook.english_id = ee_adverb.english_id '
+                  ' AND ee_wordbook.user_id = %s) AS word '
+                  ' FROM ee_adverb '
+                  ' LEFT JOIN ee_english eng ON english_id = eng.id'
+                  ' GROUP BY english_id, eng.name , eng.transcription, '
+                  ' eng.sound_path '
+                  ' UNION SELECT 1, NULL, english_id,  NULL, russian_id, '
+                  ' ee_russian.name, NULL, NULL, NULL '
+                  ' FROM ee_adverb'
+                  ' LEFT JOIN ee_russian ON russian_id = ee_russian.id'
+                  ' ORDER BY english_id, number_row')
+
+    template_name = 'Lists/list.html'
+    context_object_name = 'list'
+    model = models.Adverb
+    paginate_by = 40
+
+    def get_queryset(self, **kwargs):
+        qs = super().get_queryset(**kwargs)
+        return qs.raw(self.query_text, [self.request.user.id])
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(AdverbListView, self).get_context_data(**kwargs)
+        context['title'] = 'Наречия'
+        context['inf'] = 'Нет слов'
+
+        return context
+
+
+# Conjunction
+class ConjunctionListView(generic.ListView):
+
+    query_text = (
+        'SELECT 1 id, row_number() OVER(ORDER BY english_id) number_row,'
+        ' english_id, eng.name, NULL rus_id, NULL rus, eng.transcription, '
+        ' eng.sound_path, '
+        ' (SELECT english_id FROM ee_wordbook '
+        ' WHERE ee_wordbook.english_id = ee_conjunction.english_id '
+        ' AND ee_wordbook.user_id = %s) AS word '
+        ' FROM ee_conjunction '
+        ' LEFT JOIN ee_english eng ON english_id = eng.id'
+        ' GROUP BY english_id, eng.name , eng.transcription, eng.sound_path'
+        ' UNION SELECT 1, NULL, english_id,  NULL, russian_id, '
+        ' ee_russian.name, NULL, NULL, NULL '
+        ' FROM ee_conjunction'
+        ' LEFT JOIN ee_russian ON russian_id = ee_russian.id'
+        ' ORDER BY english_id, number_row')
+
+    template_name = 'Lists/list.html'
+    model = models.Conjunction
+    context_object_name = 'list'
+    paginate_by = 40
+
+    def get_queryset(self, **kwargs):
+        qs = super().get_queryset(**kwargs)
+        return qs.raw(self.query_text, [self.request.user.id])
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(ConjunctionListView,
+                        self).get_context_data(**kwargs)
+
+        context['title'] = 'Союзы'
+        context['inf'] = 'Нет слов'
+
+        return context
+
+
+# Noun
+class NounListView(generic.ListView):
+
+    query_text = (
+        'SELECT 1 id, row_number() OVER(ORDER BY english_id) number_row,'
+        ' english_id, eng.name, NULL rus_id, NULL rus, eng.transcription, '
+        ' eng.sound_path, '
+        ' (SELECT english_id FROM ee_wordbook '
+        ' WHERE ee_wordbook.english_id = ee_noun.english_id '
+        ' AND ee_wordbook.user_id = %s) AS word '
+        ' FROM ee_noun '
+        ' LEFT JOIN ee_english eng ON english_id = eng.id'
+        ' GROUP BY english_id, eng.name , eng.transcription, eng.sound_path'
+        ' UNION SELECT 1, NULL, english_id,  NULL, russian_id, '
+        ' ee_russian.name, NULL, NULL, NULL'
+        ' FROM ee_noun'
+        ' LEFT JOIN ee_russian ON russian_id = ee_russian.id'
+        ' ORDER BY english_id, number_row')
+
+    template_name = 'Lists/list.html'
+    model = models.Noun
+    context_object_name = 'list'
+    paginate_by = 40
+
+    def get_queryset(self, **kwargs):
+        qs = super().get_queryset(**kwargs)
+        return qs.raw(self.query_text, [self.request.user.id])
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(NounListView, self).get_context_data(**kwargs)
+
+        context['title'] = 'Существительные'
+        context['inf'] = 'Нет слов'
+        return context
+
+
+# Preposition
+class PrepositionListView(generic.ListView):
+
+    query_text = (
+        'SELECT 1 id, row_number() OVER(ORDER BY english_id) number_row,'
+        ' english_id, eng.name, NULL rus_id, NULL rus, eng.transcription, '
+        ' eng.sound_path, '
+        ' (SELECT english_id FROM ee_wordbook '
+        ' WHERE ee_wordbook.english_id = ee_preposition.english_id '
+        ' AND ee_wordbook.user_id = %s) AS word '
+        ' FROM ee_preposition '
+        ' LEFT JOIN ee_english eng ON english_id = eng.id'
+        ' GROUP BY english_id, eng.name , eng.transcription, eng.sound_path'
+        ' UNION SELECT 1, NULL, english_id,  NULL, russian_id, '
+        ' ee_russian.name, NULL, NULL , NULL '
+        ' FROM ee_preposition'
+        ' LEFT JOIN ee_russian ON russian_id = ee_russian.id'
+        ' ORDER BY english_id, number_row')
+
+    template_name = 'Lists/list.html'
+    model = models.Preposition
+    context_object_name = 'list'
+    paginate_by = 40
+
+    def get_queryset(self, **kwargs):
+        qs = super().get_queryset(**kwargs)
+        return qs.raw(self.query_text, [self.request.user.id])
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(PrepositionListView,
+                        self).get_context_data(**kwargs)
+
+        context['title'] = 'Предлоги'
+        context['inf'] = 'Нет слов'
+        return context
+
+
+# Pronoun
+class PronounListView(generic.ListView):
+
+    query_text = (
+        'SELECT 1 id, row_number() OVER(ORDER BY english_id) number_row,'
+        ' english_id, eng.name, NULL rus_id, NULL rus, '
+        ' eng.transcription, eng.sound_path, '
+        ' (SELECT english_id FROM ee_wordbook '
+        ' WHERE ee_wordbook.english_id = ee_pronoun.english_id '
+        ' AND ee_wordbook.user_id = %s) AS word '
+        ' FROM ee_pronoun '
+        ' LEFT JOIN ee_english eng ON english_id = eng.id'
+        ' GROUP BY english_id, eng.name , eng.transcription, eng.sound_path'
+        ' UNION SELECT 1, NULL, english_id,  NULL, russian_id, '
+        ' ee_russian.name, NULL, NULL, NULL'
+        ' FROM ee_pronoun'
+        ' LEFT JOIN ee_russian ON russian_id = ee_russian.id'
+        ' ORDER BY english_id, number_row')
+
+    template_name = 'Lists/list.html'
+    model = models.Pronoun
+    context_object_name = 'list'
+    paginate_by = 40
+
+    def get_queryset(self, **kwargs):
+        qs = super().get_queryset(**kwargs)
+        return qs.raw(self.query_text, [self.request.user.id])
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(PronounListView, self).get_context_data(**kwargs)
+
+        context['title'] = 'Местоимения'
+        context['inf'] = 'Нет слов'
+        return context
+
+
+# Verb
+class VerbListView(generic.ListView):
+
+    query_text = (
+        'SELECT 1 id, row_number() OVER(ORDER BY english_id) number_row,'
+        ' english_id, eng.name, NULL rus_id, NULL rus, '
+        ' eng.transcription, eng.sound_path, '
+        ' (SELECT english_id FROM ee_wordbook '
+        ' WHERE ee_wordbook.english_id = ee_verb.english_id '
+        ' AND ee_wordbook.user_id = %s) AS word '
+        ' FROM ee_verb '
+        ' LEFT JOIN ee_english eng ON english_id = eng.id'
+        ' GROUP BY english_id, eng.name , eng.transcription, eng.sound_path'
+        ' UNION SELECT 1, NULL, english_id,  NULL, russian_id, '
+        ' ee_russian.name, NULL, NULL, NULL'
+        ' FROM ee_verb'
+        ' LEFT JOIN ee_russian ON russian_id = ee_russian.id'
+        ' ORDER BY english_id, number_row')
+
+    template_name = 'Lists/list.html'
+    context_object_name = 'list'
+    model = models.Verb
+    paginate_by = 40
+
+    def get_queryset(self, **kwargs):
+        qs = super().get_queryset(**kwargs)
+        return qs.raw(self.query_text, [self.request.user.id])
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(VerbListView, self).get_context_data(**kwargs)
+
+        context['title'] = 'Глаголы'
+        context['inf'] = 'Нет слов'
+        return context
+
+
+# Wordbook
+class WordbookListView(LoginRequiredMixin, generic.ListView):
+
+    template_name = 'Lists/list.html'
+    model = models.Wordbook
+    context_object_name = 'wordbook'
+    paginate_by = 10
+
+    def get_queryset(self, **kwargs):
+        qs = super().get_queryset(**kwargs)
+        return qs.filter(user_id=self.request.user.id)
+
+    def create(self, request, pk):
+
+        if request.method == "POST" and self.is_ajax(request):
+            id_word = request.POST.get('path')
+            if request.path == request.POST.get('path'):
+                querySet = models.Wordbook.objects.filter(
+                    id=pk,
+                    user_id=request.user.id
+                )
+            else:
+                # chek for list
+                querySet = models.Wordbook.objects.filter(
+                    english_id=id_word,
+                    user_id=request.user.id
+                )
+            if querySet.count() > 0:
+                querySet.delete()
+                response = {
+                    'wordbook_list': False
+                }
+            else:
+                models.Wordbook.objects.create(
+                    english_id=id_word,
+                    user_id=request.user.id
+                )
+                response = {
+                    'wordbook_list': True
+                }
+        return JsonResponse(response)
+
+    def is_ajax(self, request):
+        return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(WordbookListView, self).get_context_data(**kwargs)
+
+        context['title'] = 'Словарик'
+        context['url_word'] = 'ee:wordbook_detail'
+        context['url_create_word'] = 'ee:create_wordbook'
+        context['inf'] = 'Нет слов'
+        return context
+
+
+class WordbookDetailView(LoginRequiredMixin, generic.DetailView):
+
+    template_name = 'Word/word_detail.html'
+    model = models.Wordbook
+    context_object_name = 'detail'
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet
+        context.update({
+            'adjective_list': models.Adjective.objects.all().filter(
+                english=self.object.english),
+            'adverb_list': models.Adverb.objects.all().filter(
+                english=self.object.english),
+            'conjunction_list': models.Conjunction.objects.all().filter(
+                english=self.object.english),
+            'fpos_list': models.Fpos.objects.all().filter(
+                english=self.object.english),
+            'noun_list': models.Noun.objects.all().filter(
+                english=self.object.english),
+            'preposition_list': models.Preposition.objects.all().filter(
+                english=self.object.english),
+            'pronoun_list': models.Pronoun.objects.all().filter(
+                english=self.object.english),
+            'related_list': models.RelatedWord.objects.all().filter(
+                english=self.object.english),
+            'verb_list': models.Verb.objects.all().filter(
+                english=self.object.english),
+            'wordbook_list': models.Wordbook.objects.all().filter(
+                english=self.object.english,
+                user_id=self.request.user.id
+            ),
+            'next': models.Wordbook.objects.all().filter(
+                user_id=self.request.user.id,
+                english__gt=self.object.english
+            ).order_by('english').first(),
+            'previous': models.Wordbook.objects.all().filter(
+                user_id=self.request.user.id,
+                english__lt=self.object.english
+            ).order_by('english').last(),
+            'wordbook': models.Wordbook.objects.all().filter(
+                english=self.object.english,
+                user_id=self.request.user.id
+            ),
+        })
+        context['title'] = 'Словарь'
+        context['url_list'] = 'ee:wordbook_list'
+        context['url_word'] = 'ee:wordbook_detail'
+        context['url_create_word'] = 'ee:create_wordbook'
+
+        return context
+
+
+# Comment
+class Comment():
+
+    def create(self, request, pk):
+
+        if request.method == "POST" and self.is_ajax(request):
+            idCard = re.findall(r'\b\d+\b', request.path)
+            idParent = request.POST.get('parent-comment')
+            newComment = models.Comment.objects.create(
+                english_id=idCard[0] if idParent == idCard else None,
+                user_id=request.user.id,
+                text=request.POST.get('text'),
+                active=True,
+                parent_id=None if idParent == idCard else idParent
+            )
+            comment = model_to_dict(newComment)
+            comment['created'] = newComment.created.strftime("%d.%m.%y")
+            comment['user'] = newComment.user.username
+            response = {
+                'comment': comment
+            }
+            return JsonResponse(response)
+
+    def is_ajax(self, request):
+        return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
+
+
+class BookListView(generic.ListView):
+    template_name = 'Book/book.html'
+    model = models.Book
+    context_object_name = 'list'
+    paginate_by = 10
+
+    def get_context_data(self, **kwargs):
+
+        # Call the base implementation first to get a context
+        context = super(BookListView,
+                        self).get_context_data(**kwargs)
+
+        context['title'] = 'Книги'
+        context['url_book'] = 'ee:book_detail'
+        context['inf'] = 'Нет книг'
+        return context
+
+
+class BookDetailView(generic.DetailView):
+
+    template_name = 'Pages/page.html'
+    model = models.Book
+    context_object_name = 'detail'
+
+    def translate(self, request):
+        if request.method == "GET" and is_ajax(request):
+            bookcontentObject = models.Bookcontent.objects.filter(
+                id=request.GET.get('idSentence')
+            ).first()
+
+            response = {
+                'translate': bookcontentObject.sentence_russian,
+                'index': bookcontentObject.id,
+            }
+            return JsonResponse(response)
+
+    def translateWord(self, request):
+        if request.method == "GET" and is_ajax(request):
+            word = request.GET.get('Word').strip().lower()
+            englishObject = models.English.objects.filter(
+                name=word
+             ).first()
+            cardDetail = CardDetail(englishObject)
+
+            response = {
+                 'word':  word if cardDetail is None else cardDetail
+            }
+            return JsonResponse(response)
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super().get_context_data(**kwargs)
+        # Add in a QuerySet
+        page = self.kwargs['page']
+        context.update({
+            'next': models.Bookcontent.objects.all().filter(
+                book=self.object,
+                page__gt=page
+            ).order_by('page').first(),
+            'previous': models.Bookcontent.objects.all().filter(
+                book=self.object,
+                page__lt=page
+            ).order_by('page').last(),
+            'pages': models.Bookcontent.objects.values("page").distinct(
+            ).order_by("page")
+
+        })
+        context['content'] = self.getContent(self.object, page)
+        context['listName'] = 'Перевод'
+        context['url_list'] = 'ee:verb_card_list'
+        context['url_word'] = 'ee:book_detail'
+        context['url_create_word'] = 'ee:verb_card_detail'
+        return context
+
+    def getContent(self, object, page):
+        contentPage = []  # list массив
+        content = models.Bookcontent.objects.all().filter(
+            book=object,
+            page=page
+        )
+        for item in content:
+            sentences = {
+                "sentence": item, "words":
+                item.sentence_english.split(" ")
+            }  # dict ключ-значение
+            contentPage.append(sentences)
+
+        return contentPage
+
+    # def getWordssentence(sentence):
+    #     words =[]
+    #     sentence.spl
+    #     for item in sentence:
+    #         words.split(" ")
+    #     return words
+
+
+# ############################ Function handler################################
 def universal(request):
     for obj in models.English.objects.all():
         if obj.sound_path.name.find('audio') >= 0:
@@ -26,6 +643,7 @@ def universal(request):
     return render(request, 'import_success.html')
 
 
+# ++ parsing
 def get_content(request):
     st_accept = "text/html"  # говорим веб-серверу,
     # что хотим получить html
@@ -254,40 +872,31 @@ def get_content(request):
     return render(request, 'import_success.html')
 
 
+# updates table English after parsing
 def alter_dic(request):
     query_text = (' SELECT 1 as id, serv.english, dic.name,  serv.transcription_use, serv.sound_path, serv.sound_path'
                   ' FROM ee_serv AS serv'
-                       ' RIGHT JOIN ee_english AS dic'
-                       ' ON lower(serv.english)  = dic.name'
+                  '     RIGHT JOIN ee_english AS dic'
+                  '     ON lower(serv.english)  = dic.name'
                   ' GROUP BY  serv.english,dic.name, serv.transcription_use, serv.sound_path'
                   ' ORDER BY "english"')
 
     for obj in models.English.objects.raw(query_text):
         find_obj = models.English.objects.all().filter(name=obj.name)
-        transcription = "" if obj.transcription_use is None else obj.transcription_use 
+        transcription = "" if obj.transcription_use is None else obj.transcription_use
         sound_path = "" if obj.sound_path is None else obj.sound_path
         find_obj.update(transcription=transcription, sound_path=sound_path)
 
     return render(request, 'import_success.html')
 
 
-def import_from_excel(request):
-    if request.method == 'POST':
-        excel_file = request.FILES['excel_file']
-
-        df = pd.read_excel(excel_file)
-        processdf(df)
-        # processdfEngRW(df)
-
-    return render(request, 'import_success.html')
-
-
+# fix content
 def export_excel(request):
     # create DataFrame
     query_text = ('SELECT serv.english, dic.name,  dic.id'
                   ' FROM ee_serv AS serv'
-                        ' RIGHT JOIN ee_english AS dic'
-                            ' ON lower(serv.english)  = dic.name'
+                  '     RIGHT JOIN ee_english AS dic'
+                  '     ON lower(serv.english)  = dic.name'
                   ' WHERE serv.english IS NULL'
                   ' GROUP BY serv.english, dic.name, dic.id'
                   ' ORDER BY "english" desc'
@@ -305,8 +914,21 @@ def export_excel(request):
     df.to_excel(r'C:\Users\lykov\Documents\mydata.xlsx')
 
     return render(request, 'import_success.html')
+# -- parsing
 
 
+def import_from_excel(request):
+    if request.method == 'POST':
+        excel_file = request.FILES['excel_file']
+
+        df = pd.read_excel(excel_file)
+        processdf(df)
+        # processdfEngRW(df)
+
+    return render(request, 'import_success.html')
+
+
+# Book content
 def upload_file(request):
 
     if request.method == "POST":
@@ -323,880 +945,8 @@ def upload_file(request):
     return render(request, "index.html", {"form": form})
 
 
-def processdf(df):
-
-    for row in df.itertuples():
-        id = row[1]
-        # tr_verb = str(row[2])
-        # tr_pronoun = str(row[2])
-        # tr_adjective = str(row[2])
-        # tr_adverb = str(row[3])
-        tr_preposition = str(row[2])
-        tr_conjunction = str(row[3])
-        tr_noun = str(row[4])
-        objCard = models.Card.objects.get(pk=id)
-        """
-        with transaction.atomic():
-            if len(tr_verb) > 0 and tr_verb != 'nan':
-                models.VerbCard.objects.create(english_id=objCard.id)
-                arr = tr_verb.split(',')
-                for item in arr:
-                    item = item.strip()
-                    objRus = models.Russian.objects.create(name=item.title())
-                    models.Verb.objects.create(
-                        card_id=objCard.id,
-                        russian_id=objRus.id
-                        )
-         with transaction.atomic():
-            if len(tr_pronoun) > 0 and tr_pronoun != 'nan':
-                models.PronounCard.objects.create(english_id=objCard.id)
-                arr = tr_pronoun.split(',')
-                for item in arr:
-                    item = item.strip()
-                    objRus = models.Russian.objects.create(name=item.title())
-                    models.Pronoun.objects.create(
-                        card_id=objCard.id,
-                        russian_id=objRus.id
-                        )
-
-            if len(tr_adjective) > 0 and tr_adjective != 'nan':
-                models.AdjectiveCard.objects.create(english_id=objCard.id)
-                arr = tr_adjective.split(',')
-                for item in arr:
-                    item = item.strip()
-                    objRus = models.Russian.objects.create(name=item.title())
-                    models.Adjective.objects.create(
-                        card_id=objCard.id, russian_id=objRus.id)
-            if len(tr_adverb) > 0 and tr_adverb != 'nan':
-                models.AdverbCard.objects.create(english_id=objCard.id)
-                arr = tr_adverb.split(',')
-                for item in arr:
-                    item = item.strip()
-                    objRus = models.Russian.objects.create(name=item.title())
-                    models.Adverb.objects.create(
-                        card_id=objCard.id, russian_id=objRus.id)
-        """
-        with transaction.atomic():
-            if len(tr_preposition) > 0 and tr_preposition != 'nan':
-                models.PrepositionCard.objects.create(english_id=objCard.id)
-                arr = tr_preposition.split(',')
-                for item in arr:
-                    item = item.strip()
-                    objRus = models.Russian.objects.create(name=item.title())
-                    models.Preposition.objects.create(
-                        card_id=objCard.id,
-                        russian_id=objRus.id
-                    )
-            if len(tr_conjunction) > 0 and tr_conjunction != 'nan':
-                models.ConjunctionCard.objects.create(english_id=objCard.id)
-                arr = tr_conjunction.split(',')
-                for item in arr:
-                    item = item.strip()
-                    objRus = models.Russian.objects.create(name=item.title())
-                    models.Conjunction.objects.create(
-                        card_id=objCard.id,
-                        russian_id=objRus.id
-                    )
-
-            if len(tr_noun) > 0 and tr_noun != 'nan':
-                models.NounCard.objects.create(english_id=objCard.id)
-                arr = tr_noun.split(',')
-                for item in arr:
-                    item = item.strip()
-                    objRus = models.Russian.objects.create(name=item.title())
-                    models.Noun.objects.create(card_id=objCard.id,
-                                               russian_id=objRus.id)
-
-
-def processdfEng(df):
-
-    for row in df.itertuples():
-        engl = str(row[2])
-        ngsl_number = row[3]
-
-        with transaction.atomic():
-            objEnglish = models.English.objects.create(
-                name=engl,
-                ngsl_number=ngsl_number
-            )
-            models.Card.objects.create(english_id=objEnglish.id)
-
-
-def processdfEngRW(df):
-
-    for row in df.itertuples():
-        id = row[1]
-        strword = str(row[2])
-        if len(strword) > 0 and strword != 'nan':
-            with transaction.atomic():
-                fObjCard = models.Card.objects.get(pk=id)
-                arr = strword.split(',')
-                for item in arr:
-                    item = item.strip()
-                    newObjREW = models.RelatedEnglishWord.objects.create(
-                        name=item.upper()
-                    )
-                    models.RelatedWord.objects.create(
-                        card_id=fObjCard.id,
-                        relate_english_word_id=newObjREW.id
-                    )
-
-
-# Create your views here.
-def index(request):
-    """
-    Функция отображения для домашней страницы сайта.
-    """
-    # Number of visits to this view, as counted in the session variable.
-    num_visits = request.session.get('num_visits', 0)
-    request.session['num_visits'] = num_visits+1
-
-    # Отрисовка HTML-шаблона index.html с данными внутри
-    # переменной контекста context
-    return render(
-        request,
-        'index.html',
-    )
-
-
-# English
-class EnglishListView(generic.ListView):
-    template_name = 'Lists/list.html'
-    context_object_name = 'list'
-    model = models.English
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(EnglishListView, self).get_context_data(**kwargs)
-
-        context['title'] = 'Прилагательные'
-        context['inf'] = 'Нет слов'
-        context['url_word'] = 'ee:adjective_card_detail'
-        return context
-
-
-# Adjective
-class AdjectiveCardListView(generic.ListView):
-    query_text = ('SELECT  row_number() OVER(ORDER BY card_id) number_row,'
-                           ' card_id, ee_english.name, NULL rus_id, NULL rus'
-                    ' FROM ee_adjective'
-                    ' LEFT JOIN ee_english ON card_id = ee_english.id'
-                    ' GROUP BY card_id, ee_english.name'
-                    ' UNION SELECT NULL, card_id,  NULL, russian_id, ee_russian.name'
-                    ' FROM ee_adjective'
-                    ' LEFT JOIN ee_russian ON russian_id = ee_russian.id'
-                    ' ORDER BY card_id, number_row')
-
-    template_name = 'Lists/list.html'
-    context_object_name = 'list'
-    model = models.Adjective
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(AdjectiveCardListView, self).get_context_data(**kwargs)
-
-        context['title'] = 'Прилагательные'
-        context['inf'] = 'Нет слов'
-        context['url_word'] = 'ee:adjective_card_detail'
-        context['data'] = models.Adjective.objects.raw(self.query_text)
-        return context
-
-
-class AdjectiveCardDetailView(generic.DetailView):
-    template_name = 'Items/item.html'
-    model = models.AdjectiveCard
-    context_object_name = 'detail'
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'translate':  models.Adjective.objects.all().filter(
-                card=self.object.english.id),
-            'wordbook': models.Wordbook.objects.all().filter(
-                english=self.object.english,
-                user_id=self.request.user.id
-            ),
-            'next': models.AdjectiveCard.objects.all().filter(
-                english__gt=self.object.english
-            ).order_by('english').first(),
-            'previous': models.AdjectiveCard.objects.all().filter(
-                english__lt=self.object.english
-            ).order_by('english').last(),
-        })
-        context['title'] = 'Прилагательные'
-        context['listName'] = 'Перевод'
-        context['url_list'] = 'ee:adjective_card_list'
-        context['url_word'] = 'ee:adjective_card_detail'
-        context['url_create_word'] = 'ee:adjective_card_detail'
-
-        return context
-
-
-# Adverb
-class AdverbCardListView(generic.ListView):
-    template_name = 'Lists/list.html'
-    context_object_name = 'list'
-    model = models.AdverbCard
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(AdverbCardListView, self).get_context_data(**kwargs)
-
-        context['title'] = 'Наречия'
-        context['inf'] = 'Нет слов'
-        context['url_word'] = 'ee:adverb_card_detail'
-
-        return context
-
-
-class AdverbCardDetailView(generic.DetailView):
-    template_name = 'Items/item.html'
-    model = models.AdverbCard
-    context_object_name = 'detail'
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'translate':  models.Adverb.objects.all().filter(
-                card=self.object.english.id),
-            'wordbook': models.Wordbook.objects.all().filter(
-                english=self.object.english,
-                user_id=self.request.user.id
-            ),
-            'next': models.AdverbCard.objects.all().filter(
-                english__gt=self.object.english
-            ).order_by('english').first(),
-            'previous': models.AdverbCard.objects.all().filter(
-                english__lt=self.object.english
-            ).order_by('english').last(),
-        })
-        context['title'] = 'Наречия'
-        context['listName'] = 'Перевод'
-        context['url_list'] = 'ee:adverb_card_list'
-        context['url_word'] = 'ee:adverb_card_detail'
-        context['url_create_word'] = 'ee:adverb_card_detail'
-
-        return context
-
-
-# Conjunction
-class ConjunctionCardListView(generic.ListView):
-    template_name = 'Lists/list.html'
-    model = models.ConjunctionCard
-    context_object_name = 'list'
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(ConjunctionCardListView,
-                        self).get_context_data(**kwargs)
-
-        context['title'] = 'Союзы'
-        context['inf'] = 'Нет слов'
-        context['url_word'] = 'ee:conjunction_card_detail'
-
-        return context
-
-
-class ConjunctionCardDetailView(generic.DetailView):
-    template_name = 'Items/item.html'
-    model = models.ConjunctionCard
-    context_object_name = 'detail'
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'translate':  models.Conjunction.objects.all().filter(
-                card=self.object.english.id
-            ),
-            'wordbook': models.Wordbook.objects.all().filter(
-                english=self.object.english,
-                user_id=self.request.user.id
-            ),
-            'next': models.ConjunctionCard.objects.all().filter(
-                english__gt=self.object.english
-            ).order_by('english').first(),
-            'previous': models.ConjunctionCard.objects.all().filter(
-                english__lt=self.object.english
-            ).order_by('english').last(),
-        })
-        context['title'] = 'Союзы'
-        context['listName'] = 'Перевод'
-        context['url_list'] = 'ee:conjunction_card_list'
-        context['url_word'] = 'ee:conjunction_card_detail'
-        context['url_create_word'] = 'ee:conjunction_card_detail'
-        return context
-
-
-# Noun
-class NounCardListView(generic.ListView):
-    template_name = 'Lists/list.html'
-    model = models.NounCard
-    context_object_name = 'list'
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(NounCardListView, self).get_context_data(**kwargs)
-
-        context['title'] = 'Существительные'
-        context['inf'] = 'Нет слов'
-        context['url_word'] = 'ee:noun_card_detail'
-        return context
-
-
-class NounCardDetailView(generic.DetailView):
-    template_name = 'Items/item.html'
-    model = models.NounCard
-    context_object_name = 'detail'
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'translate':  models.Noun.objects.all().filter(
-                card=self.object.english.id
-            ),
-            'wordbook': models.Wordbook.objects.all().filter(
-                english=self.object.english,
-                user_id=self.request.user.id
-            ),
-            'next': models.NounCard.objects.all().filter(
-                english__gt=self.object.english
-            ).order_by('english').first(),
-            'previous': models.NounCard.objects.all().filter(
-                english__lt=self.object.english
-            ).order_by('english').last(),
-        })
-        context['title'] = 'Существительные'
-        context['listName'] = 'Перевод'
-        context['url_word'] = 'ee:noun_card_detail'
-        context['url_list'] = 'ee:noun_card_list'
-        context['url_create_word'] = 'ee:noun_card_detail'
-        return context
-
-
-# Preposition
-class PrepositionCardListView(generic.ListView):
-    template_name = 'Lists/list.html'
-    model = models.PrepositionCard
-    context_object_name = 'list'
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(PrepositionCardListView,
-                        self).get_context_data(**kwargs)
-
-        context['title'] = 'Предлоги'
-        context['inf'] = 'Нет слов'
-        context['url_word'] = 'ee:preposition_card_detail'
-        return context
-
-
-class PrepositionCardDetailView(generic.DetailView):
-    template_name = 'Items/item.html'
-    model = models.PrepositionCard
-    context_object_name = 'detail'
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'translate':  models.Preposition.objects.all().filter(
-                card=self.object.english.id
-            ),
-            'wordbook': models.Wordbook.objects.all().filter(
-                english=self.object.english,
-                user_id=self.request.user.id
-            ),
-            'next': models.PrepositionCard.objects.all().filter(
-                english__gt=self.object.english
-            ).order_by('english').first(),
-            'previous': models.PrepositionCard.objects.all().filter(
-                english__lt=self.object.english
-            ).order_by('english').last(),
-        })
-        context['title'] = 'Предлоги'
-        context['listName'] = 'Перевод'
-        context['url_list'] = 'ee:preposition_card_list'
-        context['url_word'] = 'ee:preposition_card_detail'
-        context['url_create_word'] = 'ee:preposition_card_detail'
-        return context
-
-
-# Pronoun
-class PronounCardListView(generic.ListView):
-    template_name = 'Lists/list.html'
-    model = models.PronounCard
-    context_object_name = 'list'
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(PronounCardListView, self).get_context_data(**kwargs)
-
-        context['title'] = 'Местоимения'
-        context['inf'] = 'Нет слов'
-        context['url_word'] = 'ee:pronoun_card_detail'
-        return context
-
-
-class PronounCardDetailView(generic.DetailView):
-    template_name = 'Items/item.html'
-    model = models.PronounCard
-    context_object_name = 'detail'
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'translate':  models.Pronoun.objects.all().filter(
-                card=self.object.english.id
-            ),
-            'wordbook': models.Wordbook.objects.all().filter(
-                english=self.object.english,
-                user_id=self.request.user.id
-            ),
-            'next': models.PronounCard.objects.all().filter(
-                english__gt=self.object.english
-            ).order_by('english').first(),
-            'previous': models.PronounCard.objects.all().filter(
-                english__lt=self.object.english
-            ).order_by('english').last(),
-        })
-        context['title'] = 'Местоимения'
-        context['listName'] = 'Перевод'
-        context['url_list'] = 'ee:pronoun_card_list'
-        context['url_word'] = 'ee:pronoun_card_detail'
-        context['url_create_word'] = 'ee:pronoun_card_detail'
-        return context
-
-
-# Verb
-class VerbCardListView(generic.ListView):
-    template_name = 'Lists/list.html'
-    context_object_name = 'list'
-    model = models.VerbCard
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(VerbCardListView, self).get_context_data(**kwargs)
-
-        context['title'] = 'Глаголы'
-        context['inf'] = 'Нет слов'
-        context['url_word'] = 'ee:verb_card_detail'
-        return context
-
-
-class VerbCardDetailView(generic.DetailView):
-    template_name = 'Items/item.html'
-    model = models.VerbCard
-    context_object_name = 'detail'
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        context.update({
-            'translate': models.Verb.objects.all().filter(
-                card=self.object.english.id
-            ),
-            'wordbook': models.Wordbook.objects.all().filter(
-                english=self.object.english,
-                user_id=self.request.user.id
-            ),
-            'next': models.VerbCard.objects.all().filter(
-                english__gt=self.object.english
-            ).order_by('english').first(),
-            'previous': models.VerbCard.objects.all().filter(
-                english__lt=self.object.english
-            ).order_by('english').last(),
-        })
-        context['title'] = 'Глаголы'
-        context['listName'] = 'Перевод'
-        context['url_list'] = 'ee:verb_card_list'
-        context['url_word'] = 'ee:verb_card_detail'
-        context['url_create_word'] = 'ee:verb_card_detail'
-        return context
-
-
-# Card
-class CardListView(generic.ListView):
-    template_name = 'Lists/list.html'
-    model = models.Card
-    context_object_name = 'list'
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(CardListView,
-                        self).get_context_data(**kwargs)
-
-        context['title'] = 'Слова по релевантности'
-        context['url_word'] = 'ee:card_detail'
-        context['inf'] = 'Нет слов'
-        return context
-
-
-class CardDetailView(generic.DetailView):
-    template_name = 'Card/card_detail.html'
-    model = models.Card
-    context_object_name = 'detail'
-    # textSQlComment = ('SELECT '
-    #                  '1 as id, '
-    #                  't1.text AS text1, '
-    #                  't1.created AS created1, '
-    #                  't1.active AS active1, '
-    #                  't1.english_id AS english1, '
-    #                  'au1.username AS user1, '
-    #                  't2.text AS text2, '
-    #                  't2.created AS created2, '
-    #                  't2.active AS active2, '
-    #                  'au2.username AS user2 '
-    #                  'FROM '
-    #                  'ee_comment AS t1 '
-    #                  'LEFT JOIN ee_comment AS t2 ON t2.parent_id = t1.id '
-    #                  'LEFT JOIN auth_user AS au1 ON au1.id = t1.user_id '
-    #                  'LEFT JOIN auth_user AS au2 ON au2.id = t2.user_id '
-    #                  'WHERE t1.english_id = 1 '
-    #                  )
-
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        # Add in a QuerySet
-        context.update({
-            'adjective_list': models.Adjective.objects.all().filter(
-                card=self.object
-            ),
-            'adverb_list': models.Adverb.objects.all().filter(
-                card=self.object
-            ),
-            'conjunction_list': models.Conjunction.objects.all().filter(
-                card=self.object
-            ),
-            'fpos_list': models.Fpos.objects.all().filter(
-                card=self.object
-            ),
-            'noun_list': models.Noun.objects.all().filter(
-                card=self.object
-            ),
-            'preposition_list': models.Preposition.objects.all().filter(
-                card=self.object
-            ),
-            'pronoun_list': models.Pronoun.objects.all().filter(
-                card=self.object
-            ),
-            'related_list': models.RelatedWord.objects.all().filter(
-                card=self.object
-            ),
-            'verb_list': models.Verb.objects.all().filter(
-                card=self.object
-            ),
-            'wordbook': models.Wordbook.objects.all().filter(
-                english=self.object.english,
-                user_id=self.request.user.id
-            ),
-            # 'comments': models.Comment.objects.raw(self.textSQlComment),
-            'comments': self.getComments(),
-            'next': models.Card.objects.all().filter(
-                english__gt=self.object.english
-            ).order_by('english').first(),
-            'previous': models.Card.objects.all().filter(
-                english__lt=self.object.english
-            ).order_by('english').last(),
-        })
-        context['title'] = 'Слова по релевантности'
-        context['url_list'] = 'ee:card_list'
-        context['url_word'] = 'ee:card_detail'
-        context['url_create_word'] = 'ee:card_detail'
-        return context
-
-    def getComments(self):
-        SetComments = models.Comment.objects.all().filter(
-            english_id=self.object.id
-        )
-        listComment = []
-        for item in SetComments:
-            strComment = {'id': item.id,
-                          'text': item.text,
-                          'user': item.user,
-                          'created': item.created,
-                          'active': item.active,
-                          'subComment': models.Comment.objects.all().filter(
-                              parent_id=item.id
-                          )
-                          }
-            listComment.append(strComment)
-        return listComment
-
-
-# Wordbook
-class WordbookListView(LoginRequiredMixin, generic.ListView):
-
-    template_name = 'Lists/list.html'
-    model = models.Wordbook
-    context_object_name = 'list'
-    paginate_by = 10
-
-    def get_queryset(self, **kwargs):
-        qs = super().get_queryset(**kwargs)
-        return qs.filter(user_id=self.request.user.id)
-
-    def create(self, request, pk):
-
-        if request.method == "POST" and self.is_ajax(request):
-            if request.path == request.POST.get('path'):
-                querySet = models.Wordbook.objects.filter(
-                    id=pk,
-                    user_id=request.user.id
-                )
-            else:
-                querySet = models.Wordbook.objects.filter(
-                    english_id=pk,
-                    user_id=request.user.id
-                )
-            if querySet.count() > 0:
-                querySet.delete()
-                response = {
-                    'wordbook_list': False
-                }
-            else:
-                models.Wordbook.objects.create(
-                    english_id=pk,
-                    user_id=request.user.id
-                )
-                response = {
-                    'wordbook_list': True
-                }
-        return JsonResponse(response)
-
-    def is_ajax(self, request):
-        return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(WordbookListView,
-                        self).get_context_data(**kwargs)
-
-        context['title'] = 'Словарик'
-        context['url_word'] = 'ee:wordbook_detail'
-        context['inf'] = 'Нет слов'
-        return context
-
-
-class WordbookDetailView(LoginRequiredMixin, generic.DetailView):
-
-    template_name = 'Card/card_detail.html'
-    model = models.Wordbook
-    context_object_name = 'detail'
-
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        # Add in a QuerySet
-        context.update({
-            'adjective_list': models.Adjective.objects.all().filter(
-                card=self.object.english_id
-            ),
-            'adverb_list': models.Adverb.objects.all().filter(
-                card=self.object.english_id
-            ),
-            'conjunction_list': models.Conjunction.objects.all().filter(
-                card=self.object.english_id
-            ),
-            'fpos_list': models.Fpos.objects.all().filter(
-                card=self.object.english_id
-            ),
-            'noun_list': models.Noun.objects.all().filter(
-                card=self.object.english_id
-            ),
-            'preposition_list': models.Preposition.objects.all().filter(
-                card=self.object.english_id
-            ),
-            'pronoun_list': models.Pronoun.objects.all().filter(
-                card=self.object.english_id
-            ),
-            'related_list': models.RelatedWord.objects.all().filter(
-                card=self.object.english_id
-            ),
-            'verb_list': models.Verb.objects.all().filter(
-                card=self.object.english_id
-            ),
-            'wordbook_list': models.Wordbook.objects.all().filter(
-                english=self.object.english_id,
-                user_id=self.request.user.id
-            ),
-            'next': models.Wordbook.objects.all().filter(
-                user_id=self.request.user.id,
-                english__gt=self.object.english
-            ).order_by('english').first(),
-            'previous': models.Wordbook.objects.all().filter(
-                user_id=self.request.user.id,
-                english__lt=self.object.english
-            ).order_by('english').last(),
-            'wordbook': models.Wordbook.objects.all().filter(
-                english=self.object.english,
-                user_id=self.request.user.id
-            ),
-        })
-        context['title'] = 'Словарь'
-        context['url_list'] = 'ee:wordbook_list'
-        context['url_word'] = 'ee:wordbook_detail'
-        context['url_create_word'] = 'ee:create_wordbook'
-
-        return context
-
-
-# Comment
-class Comment():
-
-    def create(self, request, pk):
-
-        if request.method == "POST" and self.is_ajax(request):
-            idCard = re.findall(r'\b\d+\b', request.path)
-            idParent = request.POST.get('parent-comment')
-            newComment = models.Comment.objects.create(
-                english_id=idCard[0] if idParent == idCard else None,
-                user_id=request.user.id,
-                text=request.POST.get('text'),
-                active=True,
-                parent_id=None if idParent == idCard else idParent
-            )
-            comment = model_to_dict(newComment)
-            comment['created'] = newComment.created.strftime("%d.%m.%y")
-            comment['user'] = newComment.user.username
-            response = {
-                'comment': comment
-            }
-            return JsonResponse(response)
-
-    def is_ajax(self, request):
-        return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
-
-
-class BookListView(generic.ListView):
-    template_name = 'Book/book.html'
-    model = models.Book
-    context_object_name = 'list'
-    paginate_by = 10
-
-    def get_context_data(self, **kwargs):
-
-        # Call the base implementation first to get a context
-        context = super(BookListView,
-                        self).get_context_data(**kwargs)
-
-        context['title'] = 'Книги'
-        context['url_book'] = 'ee:book_detail'
-        context['inf'] = 'Нет книг'
-        return context
-
-
-class BookDetailView(generic.DetailView):
-
-    template_name = 'Pages/page.html'
-    model = models.Book
-    context_object_name = 'detail'
-
-    def translate(self, request):
-        if request.method == "GET" and is_ajax(request):
-            bookcontentObject = models.Bookcontent.objects.filter(
-                id=request.GET.get('idSentence')
-            ).first()
-
-            response = {
-                'translate': bookcontentObject.sentence_russian,
-                'index': bookcontentObject.id,
-            }
-            return JsonResponse(response)
-
-    def translateWord(self, request):
-        if request.method == "GET" and is_ajax(request):
-            word = request.GET.get('Word').strip().lower()
-            englishObject = models.English.objects.filter(
-                name=word
-             ).first()
-            cardDetail = CardDetail(englishObject)
-
-            response = {
-                 'word':  word if cardDetail is None else cardDetail
-            }
-            return JsonResponse(response)
-
-    def get_context_data(self, **kwargs):
-        # Call the base implementation first to get a context
-        context = super().get_context_data(**kwargs)
-        # Add in a QuerySet
-        page = self.kwargs['page']
-        context.update({
-            'next': models.Bookcontent.objects.all().filter(
-                book=self.object,
-                page__gt=page
-            ).order_by('page').first(),
-            'previous': models.Bookcontent.objects.all().filter(
-                book=self.object,
-                page__lt=page
-            ).order_by('page').last(),
-            'pages': models.Bookcontent.objects.values("page").distinct(
-            ).order_by("page")
-
-        })
-        context['content'] = self.getContent(self.object, page)
-        context['listName'] = 'Перевод'
-        context['url_list'] = 'ee:verb_card_list'
-        context['url_word'] = 'ee:book_detail'
-        context['url_create_word'] = 'ee:verb_card_detail'
-        return context
-
-    def getContent(self, object, page):
-        contentPage = []  # list массив
-        content = models.Bookcontent.objects.all().filter(
-            book=object,
-            page=page
-        )
-        for item in content:
-            sentences = {
-                "sentence": item, "words":
-                item.sentence_english.split(" ")
-            }  # dict ключ-значение
-            contentPage.append(sentences)
-
-        return contentPage
-
-    # def getWordssentence(sentence):
-    #     words =[]
-    #     sentence.spl
-    #     for item in sentence:
-    #         words.split(" ")
-    #     return words
-
-
 # ################################ Servis ###################################
+# ++ Book content
 def handle_uploaded_file(f):
     numberPage = 0
     for chunk in f.chunks():
@@ -1345,6 +1095,7 @@ def handle_duble_uploaded_file(fEng, fRus):
                 page=numberPage,
                 book=Book
             )
+# -- Book content
 
 
 def is_ajax(request):
@@ -1388,6 +1139,118 @@ def CardDetail(object):
 
 def getJsonList(queryset):
 
-    serialized_data = serialize("json", queryset, use_natural_foreign_keys=True)
+    serialized_data = serialize("json",
+                                queryset,
+                                use_natural_foreign_keys=True)
     serialized_data = json.loads(serialized_data)
     return serialized_data
+
+
+# ++ upload word
+def processdf(df):
+
+    for row in df.itertuples():
+        id = row[1]
+        tr_noun = str(row[2])
+        tr_verb = str(row[3])
+        tr_pronoun = str(row[4])
+        tr_adjective = str(row[5])
+        tr_adverb = str(row[6])
+        tr_preposition = str(row[7])
+        tr_conjunction = str(row[8])
+
+        obj_english = models.English.objects.get(pk=id)
+
+        with transaction.atomic():
+            if len(tr_noun) > 0 and tr_noun != 'nan':
+                arr = tr_noun.split(',')
+                for item in arr:
+                    item = item.strip()
+                    obj_rus = models.Russian.objects.create(name=item.capitalize())
+                    models.Noun.objects.create(
+                        english=obj_english,
+                        russian=obj_rus)
+            if len(tr_verb) > 0 and tr_verb != 'nan':
+                arr = tr_verb.split(',')
+                for item in arr:
+                    item = item.strip()
+                    obj_rus = models.Russian.objects.create(name=item.capitalize())
+                    models.Verb.objects.create(
+                        english=obj_english,
+                        russian=obj_rus)
+            if len(tr_pronoun) > 0 and tr_pronoun != 'nan':
+                arr = tr_pronoun.split(',')
+                for item in arr:
+                    item = item.strip()
+                    obj_rus = models.Russian.objects.create(name=item.capitalize())
+                    models.Pronoun.objects.create(
+                        english=obj_english,
+                        russian=obj_rus)
+            if len(tr_adjective) > 0 and tr_adjective != 'nan':
+                arr = tr_adjective.split(',')
+                for item in arr:
+                    item = item.strip()
+                    obj_rus = models.Russian.objects.create(name=item.capitalize())
+                    models.Adjective.objects.create(
+                        english=obj_english,
+                        russian=obj_rus)
+            if len(tr_adverb) > 0 and tr_adverb != 'nan':
+                arr = tr_adverb.split(',')
+                for item in arr:
+                    item = item.strip()
+                    obj_rus = models.Russian.objects.create(name=item.capitalize())
+                    models.Adverb.objects.create(
+                        english=obj_english,
+                        russian=obj_rus)
+            if len(tr_preposition) > 0 and tr_preposition != 'nan':
+                arr = tr_preposition.split(',')
+                for item in arr:
+                    item = item.strip()
+                    obj_rus = models.Russian.objects.create(name=item.capitalize())
+                    models.Preposition.objects.create(
+                        english=obj_english,
+                        russian=obj_rus)
+            if len(tr_conjunction) > 0 and tr_conjunction != 'nan':
+                arr = tr_conjunction.split(',')
+                for item in arr:
+                    item = item.strip()
+                    obj_rus = models.Russian.objects.create(name=item.capitalize())
+                    models.Conjunction.objects.create(
+                        english=obj_english,
+                        russian=obj_rus)
+
+
+# insert data at tabla english
+def processdfEng(df):
+
+    for row in df.itertuples():
+        engl = str(row[2])
+        ngsl_number = row[3]
+
+        with transaction.atomic():
+            models.English.objects.create(
+                name=engl,
+                ngsl_number=ngsl_number
+            )
+
+
+# insert data at tabla relative words
+def processdfEngRW(df):
+
+    for row in df.itertuples():
+        id = row[1]
+        strword = str(row[2])
+        if len(strword) > 0 and strword != 'nan':
+            with transaction.atomic():
+                fObjEnglish = models.English.objects.get(pk=id)
+                arr = strword.split(',')
+                for item in arr:
+                    item = item.strip()
+                    newObjREW = models.RelatedEnglishWord.objects.create(
+                        name=item.title()
+                    )
+                    models.RelatedWord.objects.create(
+                        english_id=fObjEnglish.id,
+                        relate_english_word_id=newObjREW.id
+                    )
+# -- upload word

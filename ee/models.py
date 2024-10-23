@@ -20,6 +20,9 @@ class English(models.Model):
     transcription = models.CharField(max_length=30, blank=True, default='')
     sound_path = models.FileField(upload_to='media/')
 
+    class Meta:
+        ordering = ["id"]
+
     def __str__(self):
         """
         String for representing the Model object.
@@ -61,6 +64,79 @@ class RelatedEnglishWord(models.Model):
         return (self.name)
 
 
+# Related word forms (plural, verb forms)
+class RelatedWord(models.Model):
+
+    id = models.AutoField
+    english = models.ForeignKey(English, on_delete=models.CASCADE)
+    relate_english_word = models.ForeignKey(RelatedEnglishWord,
+                                            on_delete=models.CASCADE)
+
+
+# Adjective
+class Adjective(models.Model):
+
+    id = models.AutoField
+    english = models.ForeignKey(English, on_delete=models.CASCADE)
+    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
+
+
+# Adverb
+class Adverb(models.Model):
+
+    id = models.AutoField
+    english = models.ForeignKey(English, on_delete=models.CASCADE)
+    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
+
+
+# Conjunction
+class Conjunction(models.Model):
+
+    id = models.AutoField
+    english = models.ForeignKey(English, on_delete=models.CASCADE)
+    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
+
+
+# FPoS functional parts of speech
+class Fpos(models.Model):
+
+    id = models.AutoField
+    english = models.ForeignKey(English, on_delete=models.CASCADE)
+    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
+
+
+# Noun
+class Noun(models.Model):
+
+    id = models.AutoField
+    english = models.ForeignKey(English, on_delete=models.CASCADE)
+    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
+
+
+# Preposition
+class Preposition(models.Model):
+
+    id = models.AutoField
+    english = models.ForeignKey(English, on_delete=models.CASCADE)
+    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
+
+
+# Pronoun
+class Pronoun(models.Model):
+
+    id = models.AutoField
+    english = models.ForeignKey(English, on_delete=models.CASCADE)
+    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
+
+
+# Verb
+class Verb(models.Model):
+
+    id = models.AutoField
+    english = models.ForeignKey(English, on_delete=models.CASCADE)
+    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
+
+
 # Example
 class Example(models.Model):
 
@@ -68,179 +144,11 @@ class Example(models.Model):
     name = models.CharField(max_length=200, blank=True, default='')
 
 
-# Element
-class Card(models.Model):
-
-    id = models.AutoField
-    english = models.ForeignKey(English,
-                                on_delete=models.CASCADE)
-
-    def __str__(self):
-        """
-        String for representing the Model object.
-        """
-        return self.english.name
-
-
-# Adjective
-class Adjective(models.Model):
-
-    id = models.AutoField
-    card = models.ForeignKey(Card,
-                             on_delete=models.CASCADE)
-    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
-
-
-class AdjectiveCard(models.Model):
-
-    id = models.AutoField
-    english = models.ForeignKey(English, on_delete=models.CASCADE)
-
-
-# Adverb
-class Adverb(models.Model):
-
-    id = models.AutoField
-    card = models.ForeignKey(Card,
-                             on_delete=models.CASCADE)
-    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
-
-
-class AdverbCard(models.Model):
-
-    id = models.AutoField
-    english = models.ForeignKey(English, on_delete=models.CASCADE)
-
-
-# Conjunction
-class Conjunction(models.Model):
-
-    id = models.AutoField
-    card = models.ForeignKey(Card,
-                             on_delete=models.CASCADE
-                             )
-    russian = models.ForeignKey(Russian,
-                                on_delete=models.CASCADE
-                                )
-
-
-class ConjunctionCard(models.Model):
-
-    id = models.AutoField
-    english = models.ForeignKey(English,
-                                on_delete=models.CASCADE
-                                )
-
-
-# FPoS functional parts of speech
-class Fpos(models.Model):
-
-    id = models.AutoField
-    card = models.ForeignKey(Card,
-                             on_delete=models.CASCADE
-                             )
-    russian = models.ForeignKey(Russian,
-                                on_delete=models.CASCADE
-                                )
-
-
-# Noun
-class Noun(models.Model):
-
-    id = models.AutoField
-    card = models.ForeignKey(Card,
-                             on_delete=models.CASCADE
-                             )
-    russian = models.ForeignKey(Russian,
-                                on_delete=models.CASCADE
-                                )
-
-
-class NounCard(models.Model):
-
-    id = models.AutoField
-    english = models.ForeignKey(English,
-                                on_delete=models.CASCADE
-                                )
-
-
-# Preposition
-class Preposition(models.Model):
-
-    id = models.AutoField
-    card = models.ForeignKey(Card,
-                             on_delete=models.CASCADE
-                             )
-    russian = models.ForeignKey(Russian,
-                                on_delete=models.CASCADE
-                                )
-
-
-class PrepositionCard(models.Model):
-
-    id = models.AutoField
-    english = models.ForeignKey(English,
-                                on_delete=models.CASCADE
-                                )
-
-
-# Pronoun
-class Pronoun(models.Model):
-
-    id = models.AutoField
-    card = models.ForeignKey(Card,
-                             on_delete=models.CASCADE
-                             )
-    russian = models.ForeignKey(Russian,
-                                on_delete=models.CASCADE
-                                )
-
-
-class PronounCard(models.Model):
-
-    id = models.AutoField
-    english = models.ForeignKey(English,
-                                on_delete=models.CASCADE
-                                )
-
-
-# Verb
-class Verb(models.Model):
-
-    id = models.AutoField
-    card = models.ForeignKey(Card,
-                             on_delete=models.CASCADE)
-    russian = models.ForeignKey(Russian, on_delete=models.CASCADE)
-
-
-class VerbCard(models.Model):
-
-    id = models.AutoField
-    english = models.ForeignKey(English,
-                                on_delete=models.CASCADE
-                                )
-
-
-# Related word forms (plural, verb forms)
-class RelatedWord(models.Model):
-
-    id = models.AutoField
-    card = models.ForeignKey(
-                            Card,
-                            on_delete=models.CASCADE
-                            )
-    relate_english_word = models.ForeignKey(
-                            RelatedEnglishWord,
-                            on_delete=models.CASCADE
-                            )
-
-
 # Exampl word forms
 class ExampleWord(models.Model):
 
     id = models.AutoField
-    card = models.ForeignKey(Card,
-                             on_delete=models.CASCADE)
+    english = models.ForeignKey(English, on_delete=models.CASCADE)
     example = models.ForeignKey(Example, on_delete=models.CASCADE)
 
 
@@ -248,13 +156,14 @@ class ExampleWord(models.Model):
 class Wordbook(models.Model):
     id = models.AutoField
     english = models.ForeignKey(English,
-                                on_delete=models.CASCADE
-                                )
+                                on_delete=models.CASCADE)
     user = models.ForeignKey(User,
-                             on_delete=models.SET_NULL, null=True, blank=True)
+                             on_delete=models.SET_NULL,
+                             null=True,
+                             blank=True)
 
     class Meta:
-        ordering = ['id']
+        ordering = ['english']
 
 
 class Comment(models.Model):
@@ -265,16 +174,14 @@ class Comment(models.Model):
     text = models.CharField(max_length=200, blank=True, default='')
     english = models.ForeignKey(English,
                                 on_delete=models.CASCADE,
-                                null=True
-                                )
-    user = models.ForeignKey(
-                    User,
-                    on_delete=models.SET_NULL, null=True, blank=True
-                    )
-    parent = models.ForeignKey(
-                    'self',
-                    on_delete=models.CASCADE, null=True,
-                    )
+                                null=True)
+    user = models.ForeignKey(User,
+                             on_delete=models.SET_NULL,
+                             null=True,
+                             blank=True)
+    parent = models.ForeignKey('self',
+                               on_delete=models.CASCADE,
+                               null=True)
 
     class Meta:
         ordering = ('created',)
@@ -294,8 +201,7 @@ class Book (models.Model):
     title = models.CharField(max_length=200, blank=True, default='')
     level = models.ForeignKey(Level,
                               on_delete=models.CASCADE,
-                              null=True
-                              )
+                              null=True)
     unique_words = models.SmallIntegerField()
     total_words = models.SmallIntegerField()
     description = models.CharField(max_length=1000, blank=True, default='')

@@ -35,7 +35,7 @@ class CardViewSets(viewsets.ModelViewSet):
 
     Additionally we also provide an extra `highlight` action.
     """
-    queryset = models.Card.objects.all()
+    queryset = models.English.objects.all()
     serializer_class = serializers.CardSerializer
 
 

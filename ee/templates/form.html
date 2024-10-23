@@ -17,7 +17,7 @@
 {% block addWordbook %}
   {% if user.is_authenticated %}
     <form id="create-wordbook" method="post"> 
-      <input type="hidden" id="url-wordbook" data-url="{% url 'ee:create_wordbook' detail.pk %}"  value="{% url url_create_word detail.pk %}"
+      <input type="hidden" id="url-wordbook" data-url="{% url url_create_word detail.pk %}"  value="{{detail.id }}"
        name="path"/>
       {% csrf_token %}
       {% if wordbook %}
@@ -33,7 +33,7 @@
 
 {% block js %}
   {% load static %}
-    <script type="text/javascript" src={% static "js/main.js" %}></script>
+    <script type="text/javascript" src={% static "js/main1.js" %}></script>
 {% endblock %}
 
 {% block pagination_detail %}
@@ -45,7 +45,7 @@
       {% endif %}
     </li>
     <li class="page-item disabled" aria-current="page">
-      <a class="page-link" href="#">{{ detail.english.name }}</a>
+      <a class="page-link" href="#"><></a>
     </li>
     <li class="page-item">
       {% if next %}

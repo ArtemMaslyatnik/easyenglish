@@ -1,7 +1,10 @@
 //add word in dictionary
 $(document).ready(function () {
   // отслеживаем событие отправки формы
-  $('#create-wordbook').submit(function () {
+  //$('#create-wordbook').submit(function () {
+    $('form').submit(function (e) {
+    e.preventDefault();
+    //test del
     console.log(location.href);
     // создаем AJAX-вызов
     $.ajax({
@@ -18,7 +21,6 @@ $(document).ready(function () {
           $('#removeWordbook').hide()
           $('#insertWordbook').show()
         }
-
       },
       // если ошибка, то
       error: function (response) {

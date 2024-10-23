@@ -11,7 +11,7 @@
     <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
     <!-- Добавление дополнительного статического CSS файла -->
     {% load static %}
-    <link rel="stylesheet" href="{% static 'css/styles.css' %}" />
+    <link rel="stylesheet" href="{% static 'css/styles1.css' %}" />
   </head>
 
   <body>
@@ -43,7 +43,7 @@
                   </li>
                   {% endif %}
                   <li class="nav-item">
-                    <a class="nav-link" href="{% url 'ee:card_list' %}">Слова по релевантности</a>
+                    <a class="nav-link" href="{% url 'ee:english_words' %}">Слова по релевантности</a>
                   </li>
                   <li class="nav-item">
                     <a class="nav-link" href="{% url 'ee:book_list' %}">Книги</a>
@@ -64,13 +64,13 @@
                       Части речи
                     </a>
                     <ul class="dropdown-menu">
-                      <li><a class="dropdown-item" href="{% url 'ee:adjective_card_list' %}">Прилагательное</a></li>
-                      <li><a class="dropdown-item" href="{% url 'ee:adverb_card_list' %}">Наречие</a></li>
-                      <li><a class="dropdown-item" href="{% url 'ee:conjunction_card_list' %}">Союзы</a></li>
-                      <li><a class="dropdown-item" href="{% url 'ee:noun_card_list' %}">Существительные</a></li>
-                      <li><a class="dropdown-item" href="{% url 'ee:preposition_card_list' %}">Предлоги</a></li>
-                      <li><a class="dropdown-item" href="{% url 'ee:pronoun_card_list' %}">Местоимения</a></li>
-                      <li><a class="dropdown-item" href="{% url 'ee:verb_card_list' %}">Глаголы</a></li>
+                      <li><a class="dropdown-item" href="{% url 'ee:adjectives' %}">Прилагательное</a></li>
+                      <li><a class="dropdown-item" href="{% url 'ee:adverbs' %}">Наречие</a></li>
+                      <li><a class="dropdown-item" href="{% url 'ee:conjunctions' %}">Союзы</a></li>
+                      <li><a class="dropdown-item" href="{% url 'ee:nouns' %}">Существительные</a></li>
+                      <li><a class="dropdown-item" href="{% url 'ee:prepositions' %}">Предлоги</a></li>
+                      <li><a class="dropdown-item" href="{% url 'ee:pronouns' %}">Местоимения</a></li>
+                      <li><a class="dropdown-item" href="{% url 'ee:verbs' %}">Глаголы</a></li>
                       <li>
                         <hr class="dropdown-divider">
                       </li>

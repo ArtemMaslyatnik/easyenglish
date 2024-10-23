@@ -16,24 +16,110 @@
 
 
 {% block content %}
-  <div class="alert alert-success alert-dismissible fade show mt-5" role="alert">
+  
+ <div class="alert alert-success alert-dismissible fade show mt-5" role="alert">
     {{ title }} 
-  </div>
-  {% if list %}
-    <div class="list-group">
-      {% for item in list %}
-        <a href="{% url url_word item.pk %}" class="list-group-item list-group-item-action list-group-item-light">
-          {{ item.pk  }}. {{ item.english  }}  {{ item.english.transcription  }} 
+ </div>
+  
+  {% if list %} 
+    <div>
+      <div class="bd-example-snippet bd-code-snippet">
+        <div class="bd-example m-0 border-0">
+          <div class="accordion" id="accordionExample">
+  <!-- ######################### part of speech ########################### -->
+  {% for item in list %} 
+    <div>
+    {% if not item.name is None %} 
+      <hr/>
+      <h4 >
+          {{ item.number_row  }}. {{ item.name  }}  {{ item.transcription  }} 
           {% load static %}
-          <audio controls src="{% static  item.english.sound_path %}"  type="audio/mpeg"></audio>
-        </a>
-      {% endfor %}
-      {% for item in data %}
-      {% endfor %}
-    </div>
+          <audio controls src="{% static  item.sound_path %}"  type="audio/mpeg"></audio>
+      </h4>
+      <div class="btn-add" >
+        {% if user.is_authenticated %}
+          <form id="create-wordbook" method="post"> 
+            <input type="hidden" id="url-wordbook" data-url="{% url 'ee:create_wordbook' item.pk %}"  value="{{item.english.id }}"
+            name="path"/>
+            {% csrf_token %}
+            {% if item.word %}
+              <button id="removeWordbook" type="submit" class="btn btn-outline-danger">словарь -</button>
+              <button id="insertWordbook" type="submit" class="btn btn-outline-success" style="display: none;">словарь +</button>
+            {% else %}
+              <button id="insertWordbook" type="submit" class="btn btn-outline-success">словарь +</button>
+              <button id="removeWordbook" type="submit" class="btn btn-outline-danger" style="display: none;">словарь -</button>
+            {% endif %}
+          </form>
+        {% endif %}
+      </div>
     {% else  %}
-    <p>{{ inf }}</p>
+          <div>
+              - {{ item.rus  }}
+          </div>
     {% endif %}
+    </div>
+  {% endfor %} 
+
+
+  <!-- ############################## english_words  ################################## -->  
+  {% elif list_english %}
+    <ul class="list-group list-group-flush">
+      {% for item in list_english %} 
+      <li class="list-group-item">
+        <a href="{% url url_word item.pk %}">{{ item.pk  }}. {{ item.name  }}</a>
+        {% load static %}
+        <audio controls src="{% static  item.sound_path %}"  type="audio/mpeg"></audio>
+        {% if user.is_authenticated %}
+              <form method="post"> 
+                <input type="hidden" id="url-wordbook" data-url="{% url 'ee:create_wordbook' item.pk %}"  value="{{ item.pk }}"
+                name="path"/>
+                {% csrf_token %}
+                {% if item.word %}
+                  <button id="removeWordbook" type="submit" class="btn btn-outline-danger">словарь -</button>
+                  <button id="insertWordbook" type="submit" class="btn btn-outline-success" style="display: none;">словарь +</button>
+                {% else %}
+                  <button id="insertWordbook" type="submit" class="btn btn-outline-success">словарь +</button>
+                  <button id="removeWordbook" type="submit" class="btn btn-outline-danger" style="display: none;">словарь -</button>
+                {% endif %}
+              </form>
+        {% endif %}
+        </li>
+       {% endfor %} 
+    </ul>
+  <!-- ############################## wordbooks ################################## -->  
+  {% elif wordbook %}
+    <ul class="list-group list-group-flush">
+      {% for item in wordbook %} 
+      <li class="list-group-item">
+        <a href="{% url url_word item.id %}">{{ item.english.name  }} </a>
+        {% load static %}
+        {{item.english.transcription}} 
+        <audio controls src="{% static  item.english.sound_path %}"  type="audio/mpeg"></audio>
+        {% if user.is_authenticated %}
+              <form id="create-wordbook" method="post"> 
+                <input type="hidden" id="url-wordbook" data-url="{% url 'ee:create_wordbook' item.pk %}"  value="{{item.english.id }}"
+                name="path"/>
+                {% csrf_token %}
+                {% if wordbook %}
+                  <button id="removeWordbook" type="submit" class="btn btn-outline-danger">словарь -</button>
+                  <button id="insertWordbook" type="submit" class="btn btn-outline-success" style="display: none;">словарь +</button>
+                {% else %}
+                  <button id="insertWordbook" type="submit" class="btn btn-outline-success">словарь +</button>
+                  <button id="removeWordbook" type="submit" class="btn btn-outline-danger" style="display: none;">словарь -</button>
+                {% endif %}
+              </form>
+        {% endif %}
+        </li>
+      {% endfor %} 
+    </ul>
+    {% else  %}
+    {{ inf }} 
+  {% endif %}
+{% endblock %}
+
+{% block js %}
+  {% load static %}
+    <script type="text/javascript" src={% static "js/main1.js" %}></script>
 {% endblock %}
 
 {% block pagination %}

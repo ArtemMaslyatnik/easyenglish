@@ -105,6 +105,6 @@ class CardSerializer(serializers.ModelSerializer):
     # fields = [field.name for field in model._meta.fields]
 
     class Meta:
-        model = models.Card
+        model = models.English
         fields = ['id', 'english', 'verbs', 'adjectives', 'nouns',
                   'pronouns', 'prepositions']

@@ -1,5 +1,5 @@
 from django.contrib import admin
-from ee.models import AdjectiveCard, Card, Russian, Verb, Adjective, VerbCard, English
+from ee.models import Russian, Verb, Adjective, English
 
 
 @admin.register(Russian)
@@ -14,12 +14,7 @@ class VerbInline(admin.TabularInline):
 
 @admin.register(Verb)
 class VerbAdmin(admin.ModelAdmin):
-    list_display = ('id', 'card', 'russian')
-
-
-@admin.register(VerbCard)
-class VerbCardAdmin(admin.ModelAdmin):
-    list_display = ('id', 'english')
+    list_display = ('id', 'english', 'russian')
 
 
 # Adjective
@@ -29,19 +24,7 @@ class AdjectivInline(admin.TabularInline):
 
 @admin.register(Adjective)
 class AdjectiveAdmin(admin.ModelAdmin):
-    list_display = ('id', 'card', 'russian')
-
-
-@admin.register(AdjectiveCard)
-class AdjectiveCardAdmin(admin.ModelAdmin):
-    list_display = ('id', 'english')
-
-
-# Card
-@admin.register(Card)
-class CardAdmin(admin.ModelAdmin):
-    list_display = ('id', 'english')
-    inlines = [VerbInline, AdjectivInline]
+    list_display = ('id', 'english', 'russian')
 
 
 # English
