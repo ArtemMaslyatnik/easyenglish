@@ -21,19 +21,14 @@
        name="path"/>
       {% csrf_token %}
       {% if wordbook %}
-        <button id="removeWordbook" type="submit" class="btn btn-outline-danger">словарь -</button>
-        <button id="insertWordbook" type="submit" class="btn btn-outline-success" style="display: none;">словарь +</button>
+        <button id="removeWordbook_{{detail.id }}" type="submit" class="btn btn-outline-danger">словарь -</button>
+        <button id="insertWordbook_{{detail.id }}" type="submit" class="btn btn-outline-success" style="display: none;">словарь +</button>
       {% else %}
-        <button id="insertWordbook" type="submit" class="btn btn-outline-success">словарь +</button>
-        <button id="removeWordbook" type="submit" class="btn btn-outline-danger" style="display: none;">словарь -</button>
+        <button id="insertWordbook_{{detail.id }}" type="submit" class="btn btn-outline-success">словарь +</button>
+        <button id="removeWordbook_{{detail.id }}" type="submit" class="btn btn-outline-danger" style="display: none;">словарь -</button>
       {% endif %}
     </form>
   {% endif %}
-{% endblock %}
-
-{% block js %}
-  {% load static %}
-    <script type="text/javascript" src={% static "js/main1.js" %}></script>
 {% endblock %}
 
 {% block pagination_detail %}

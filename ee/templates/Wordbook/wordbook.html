@@ -1,0 +1,73 @@
+{% extends 'base_generic.html' %}
+{% block breadcrumbs %}
+    <nav aria-label="breadcrumb">
+      <ol class="breadcrumb">
+        <li class="breadcrumb-item"><a href={% url 'ee:index' %}>Главная</a></li>
+        {% block crumbs %}
+          {% if title %} 
+            <li class="breadcrumb-item">{{ title }}</a></li>
+          {% endif %}
+        {% endblock %}
+      </ol>
+    </nav>
+{% endblock %}
+
+{% block content %}
+  
+  <div class="alert alert-success alert-dismissible fade show mt-5" role="alert">
+    {{ title }} 
+  </div>
+  
+  {% if wordbook %}
+    {% for item in wordbook %}
+      <div id='wordbook_item_{{item.english.id}}'>       
+        <hr/>
+        <h4>
+          <a href="{% url url_word item.id %}">{{ item.english.name  }} </a>
+          {% load static %}
+          {{item.english.transcription}} 
+          <audio controls src="{% static  item.english.sound_path %}"  type="audio/mpeg"></audio>
+        </h4>
+        <div class="btn-add" >
+          {% if user.is_authenticated %}
+            <form id="create-wordbook" method="post"> 
+              <input type="hidden" id="url-wordbook" data-url="{% url 'ee:create_wordbook' item.pk %}"  value="{{item.english.id }}"
+              name="path"/>
+              <input type="hidden" value="wordbook"
+              name="wordbook"/>
+              {% csrf_token %}
+                <button id="removeWordbook{{ item.id  }}" type="submit" class="btn btn-outline-danger">словарь -</button>
+            </form>
+          {% endif %}
+        </div>
+      </div>
+    {% endfor %} 
+  {% else  %}
+    {{ inf }} 
+  {% endif %}
+
+{% endblock %}
+
+{% block pagination %}
+    <ul class="pagination pagination-md flex-wrap justify-content-center">
+      {% if page_obj.has_previous %}
+        <li class="page-item">
+          <a class="page-link" href="?page=1" tabindex="-1" aria-disabled="true">первая</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.previous_page_number }}" tabindex="-1" aria-disabled="true">предыдущая</a>
+        </li>
+      {% endif %}
+      <li class="page-item disabled" aria-current="page">
+        <a class="page-link" href="#">страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</a>
+      </li>
+      {% if page_obj.has_next %}
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.next_page_number }}">следующая</a>
+        </li>
+        <li class="page-item">
+          <a class="page-link" href="?page={{ page_obj.paginator.num_pages }}">последняя</a>
+        </li>
+      {% endif %}
+    </ul>
+  {% endblock %}

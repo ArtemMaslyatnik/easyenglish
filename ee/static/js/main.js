@@ -1,7 +1,6 @@
-//add word in dictionary
+//add word in list 
 $(document).ready(function () {
   // отслеживаем событие отправки формы
-  //$('#create-wordbook').submit(function () {
     $('form').submit(function (e) {
     e.preventDefault();
     //test del
@@ -15,11 +14,16 @@ $(document).ready(function () {
       // если успешно, то
       success: function (response) {
         if (response.wordbook_list === true) {
-          $('#insertWordbook').hide()
-          $('#removeWordbook').show()
+          $('#insertWordbook_'+response.id).hide()
+          $('#removeWordbook_'+response.id).show()
         } else if (response.wordbook_list === false) {
-          $('#removeWordbook').hide()
-          $('#insertWordbook').show()
+          if (response.wordbook === 'wordbook') {
+            $('#wordbook_item_'+response.id).hide()
+          }          
+          else
+            $('#removeWordbook_'+response.id).hide()
+            $('#insertWordbook_'+response.id).show()
+          
         }
       },
       // если ошибка, то
@@ -32,6 +36,7 @@ $(document).ready(function () {
     return false
   })
 })
+
 
 //add comment 
 $(document).ready(function () {

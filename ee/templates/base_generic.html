@@ -125,6 +125,10 @@
           <p>Студия Арт</p>
           <p><a href="#">Вверх</a></p>
     </footer>
-    {% block js %}{% endblock %}
+    
+    {% block js %}
+    {% load static %}
+      <script type="text/javascript" src={% static "js/main.js" %}></script>
+    {% endblock %}
   </body>
 </html>

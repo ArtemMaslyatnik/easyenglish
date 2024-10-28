@@ -400,7 +400,7 @@ class VerbListView(generic.ListView):
 # Wordbook
 class WordbookListView(LoginRequiredMixin, generic.ListView):
 
-    template_name = 'Lists/list.html'
+    template_name = 'Wordbook/wordbook.html'
     model = models.Wordbook
     context_object_name = 'wordbook'
     paginate_by = 10
@@ -413,30 +413,24 @@ class WordbookListView(LoginRequiredMixin, generic.ListView):
 
         if request.method == "POST" and self.is_ajax(request):
             id_word = request.POST.get('path')
-            if request.path == request.POST.get('path'):
-                querySet = models.Wordbook.objects.filter(
-                    id=pk,
-                    user_id=request.user.id
-                )
-            else:
-                # chek for list
-                querySet = models.Wordbook.objects.filter(
+            wordbook = request.POST.get('wordbook')
+            # chek for list
+            querySet = models.Wordbook.objects.filter(
                     english_id=id_word,
-                    user_id=request.user.id
-                )
+                    user_id=request.user.id)
             if querySet.count() > 0:
                 querySet.delete()
                 response = {
-                    'wordbook_list': False
-                }
+                    'wordbook_list': False,
+                    'id': id_word,
+                    'wordbook': wordbook}
             else:
                 models.Wordbook.objects.create(
                     english_id=id_word,
-                    user_id=request.user.id
-                )
+                    user_id=request.user.id)
                 response = {
-                    'wordbook_list': True
-                }
+                    'wordbook_list': True,
+                    'id': id_word}
         return JsonResponse(response)
 
     def is_ajax(self, request):
@@ -456,7 +450,7 @@ class WordbookListView(LoginRequiredMixin, generic.ListView):
 
 class WordbookDetailView(LoginRequiredMixin, generic.DetailView):
 
-    template_name = 'Word/word_detail.html'
+    template_name = 'Wordbook/wordbook_detail.html'
     model = models.Wordbook
     context_object_name = 'detail'
 
@@ -574,13 +568,13 @@ class BookDetailView(generic.DetailView):
     def translateWord(self, request):
         if request.method == "GET" and is_ajax(request):
             word = request.GET.get('Word').strip().lower()
-            englishObject = models.English.objects.filter(
+            english_object = models.English.objects.filter(
                 name=word
              ).first()
-            cardDetail = CardDetail(englishObject)
+            word_detail = WordDetail(english_object)
 
             response = {
-                 'word':  word if cardDetail is None else cardDetail
+                 'word':  word if word_detail is None else word_detail
             }
             return JsonResponse(response)
 
@@ -1102,39 +1096,39 @@ def is_ajax(request):
     return request.META.get('HTTP_X_REQUESTED_WITH') == 'XMLHttpRequest'
 
 
-def CardDetail(object):
+def WordDetail(object):
 
-    CardDetail = {
+    word_detail = {
         'adjective': getJsonList(models.Adjective.objects.all().filter(
             card_id=object.id
         )),
         'adverb': getJsonList(models.Adverb.objects.all().filter(
-            card_id=object.id
+            english_id=object.id
         )),
         'conjunction': getJsonList(models.Conjunction.objects.all().filter(
-            card_id=object.id
+            english_id=object.id
         )),
         'fpos': getJsonList(models.Fpos.objects.all().filter(
-            card_id=object.id
+            english_id=object.id
         )),
         'noun': getJsonList(models.Noun.objects.all().filter(
             card_id=object.id
         )),
         'preposition': getJsonList(models.Preposition.objects.all().filter(
-            card_id=object.id
+            english_id=object.id
         )),
         'pronoun': getJsonList(models.Pronoun.objects.all().filter(
-            card_id=object.id
+            english_id=object.id
         )),
         'verb': getJsonList(models.Verb.objects.all().filter(
             card_id=object.id
         )),
         'related': getJsonList(models.RelatedWord.objects.all().filter(
-                card_id=object.id
+                english_id=object.id
         ))
     }
 
-    return CardDetail
+    return word_detail
 
 
 def getJsonList(queryset):
