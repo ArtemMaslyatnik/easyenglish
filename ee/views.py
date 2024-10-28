@@ -1,5 +1,6 @@
 import json
 import re
+import string
 import time
 import requests
 import urllib.request
@@ -568,6 +569,8 @@ class BookDetailView(generic.DetailView):
     def translateWord(self, request):
         if request.method == "GET" and is_ajax(request):
             word = request.GET.get('Word').strip().lower()
+            exclude = set(string.punctuation)
+            word = ''.join(ch for ch in word if ch not in exclude)
             english_object = models.English.objects.filter(
                 name=word
              ).first()
@@ -1100,32 +1103,23 @@ def WordDetail(object):
 
     word_detail = {
         'adjective': getJsonList(models.Adjective.objects.all().filter(
-            card_id=object.id
-        )),
+            english=object)),
         'adverb': getJsonList(models.Adverb.objects.all().filter(
-            english_id=object.id
-        )),
+            english=object)),
         'conjunction': getJsonList(models.Conjunction.objects.all().filter(
-            english_id=object.id
-        )),
+            english=object)),
         'fpos': getJsonList(models.Fpos.objects.all().filter(
-            english_id=object.id
-        )),
+            english=object)),
         'noun': getJsonList(models.Noun.objects.all().filter(
-            card_id=object.id
-        )),
+            english=object)),
         'preposition': getJsonList(models.Preposition.objects.all().filter(
-            english_id=object.id
-        )),
+            english=object)),
         'pronoun': getJsonList(models.Pronoun.objects.all().filter(
-            english_id=object.id
-        )),
+            english=object)),
         'verb': getJsonList(models.Verb.objects.all().filter(
-            card_id=object.id
-        )),
+            english=object)),
         'related': getJsonList(models.RelatedWord.objects.all().filter(
-                english_id=object.id
-        ))
+            english=object))
     }
 
     return word_detail
