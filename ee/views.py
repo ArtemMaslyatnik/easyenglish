@@ -52,7 +52,6 @@ class EnglishWordListView(generic.ListView):
         return qs.raw(self.query_text, [self.request.user.id])
 
     def get_context_data(self, **kwargs):
-
         # Call the base implementation first to get a context
         context = super(EnglishWordListView, self).get_context_data(**kwargs)
 
@@ -68,6 +67,24 @@ class WordDetailView(generic.DetailView):
     template_name = 'Word/word_detail.html'
     model = models.English
     context_object_name = 'detail'
+
+    def getComments(self):
+        SetComments = models.Comment.objects.all().filter(
+            english=self.object
+        )
+        listComment = []
+        for item in SetComments:
+            strComment = {'id': item.id,
+                          'text': item.text,
+                          'user': item.user,
+                          'created': item.created,
+                          'active': item.active,
+                          'subComment': models.Comment.objects.all().filter(
+                              parent_id=item.id
+                          )
+                          }
+            listComment.append(strComment)
+        return listComment
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -108,24 +125,6 @@ class WordDetailView(generic.DetailView):
         context['url_word'] = 'ee:word_detail'
         context['url_create_word'] = 'ee:create_wordbook'
         return context
-
-    def getComments(self):
-        SetComments = models.Comment.objects.all().filter(
-            english=self.object
-        )
-        listComment = []
-        for item in SetComments:
-            strComment = {'id': item.id,
-                          'text': item.text,
-                          'user': item.user,
-                          'created': item.created,
-                          'active': item.active,
-                          'subComment': models.Comment.objects.all().filter(
-                              parent_id=item.id
-                          )
-                          }
-            listComment.append(strComment)
-        return listComment
 
 
 # Adjective
