@@ -296,7 +296,7 @@ class WordbookSerializer(serializers.ModelSerializer):
 
     class Meta:
         model = models.Wordbook
-        fields = ['id', ]
+        fields = ['id',]
 
 
 # Wordbook
