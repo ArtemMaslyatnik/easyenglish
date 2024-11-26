@@ -32,7 +32,7 @@
                 <ul class="navbar-nav justify-content-end flex-grow-1 pe-3">
                   {% if user.is_authenticated %}
                   <li class="nav-item">
-                    <a class="nav-link active" aria-current="page" href="{% url 'logout'%}?next={{request.path}}">{{ user.get_username }}</a>
+                    <a class="nav-link active" aria-current="page" href="{% url 'ee:logout'%}">{{ user }}</a>
                   </li>
                   <li class="nav-item">
                     <a class="nav-link" href="{% url 'ee:wordbook_list' %}">Словарь</a>

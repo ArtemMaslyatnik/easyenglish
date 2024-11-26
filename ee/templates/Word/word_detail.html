@@ -131,7 +131,7 @@
             <div id="comments" class="card-body p-4">
               <form id="create-comment" method="post" >
                 <input type="hidden" id="url-comment" data-url="{% url 'ee:create_comment' detail.pk %}" />
-                <input type="hidden" name="parent-comment" value="{{detail.english.id}}"/>
+                <input type="hidden" name="parent-comment" value="{{detail.id}}"/>
                 {% csrf_token %}
                 <textarea id="textarea-comment" name="text" class="form-control" aria-label="With textarea"></textarea>
                 <button type="submit" class="btn btn-outline-primary mt-1">Отправить</button>

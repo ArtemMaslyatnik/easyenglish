@@ -15,6 +15,7 @@ from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ee.forms import UploadFileForm
 from django.core.serializers import serialize
+from django.contrib.auth import logout
 
 
 # Create your views here.
@@ -28,6 +29,16 @@ def index(request):
 
     # Отрисовка HTML-шаблона index.html с данными внутри
     # переменной контекста context
+    return render(
+        request,
+        'index.html',
+    )
+
+
+def logout_view(request):
+
+    logout(request)
+
     return render(
         request,
         'index.html',

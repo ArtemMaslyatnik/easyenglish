@@ -9,7 +9,7 @@ from rest_framework import viewsets
 class EnglishViewSets(viewsets.ModelViewSet):
     queryset = models.English.objects.all()
     serializer_class = serializers.EnglishTRranslateSerializer
-    permission_classes = (ReadOnly, )
+    # permission_classes = (ReadOnly, )
 
 
 # RussianWord
@@ -17,7 +17,7 @@ class RussianViewSets(viewsets.ModelViewSet):
 
     queryset = models.Russian.objects.all()
     serializer_class = serializers.RussianSerializer
-    permission_classes = (ReadOnly, )
+    # permission_classes = (ReadOnly, )
 
 
 # Adjective
@@ -32,7 +32,7 @@ class AdjectiveTranslateViewSets(viewsets.ModelViewSet):
 
     serializer_class = serializers.AdjectiveTranslateSerializer
     queryset = models.English.objects.raw(query_text)
-    permission_classes = (ReadOnly, )
+    # permission_classes = (ReadOnly, )
 
 
 # Adverb
@@ -47,7 +47,7 @@ class AdverbTranslateViewSets(viewsets.ModelViewSet):
 
     serializer_class = serializers.AdjectiveTranslateSerializer
     queryset = models.English.objects.raw(query_text)
-    permission_classes = (ReadOnly, )
+    # permission_classes = (ReadOnly, )
 
 
 # Conjunction
@@ -62,7 +62,7 @@ class ConjunctionTranslateViewSets(viewsets.ModelViewSet):
 
     serializer_class = serializers.ConjunctionTranslateSerializer
     queryset = models.English.objects.raw(query_text)
-    permission_classes = (ReadOnly, )
+    # permission_classes = (ReadOnly, )
 
 
 # Noun
@@ -77,7 +77,7 @@ class NounTranslateViewSets(viewsets.ModelViewSet):
 
     serializer_class = serializers.NounTranslateSerializer
     queryset = models.English.objects.raw(query_text)
-    permission_classes = (ReadOnly, )
+    # permission_classes = (ReadOnly, )
 
 
 # Noun
@@ -92,7 +92,7 @@ class PrepositionTranslateViewSets(viewsets.ModelViewSet):
 
     serializer_class = serializers.PrepositionTranslateSerializer
     queryset = models.English.objects.raw(query_text)
-    permission_classes = (ReadOnly, )
+    # permission_classes = (ReadOnly, )
 
 
 # Noun
@@ -107,7 +107,7 @@ class PronounTranslateViewSets(viewsets.ModelViewSet):
 
     serializer_class = serializers.PronounTranslateSerializer
     queryset = models.English.objects.raw(query_text)
-    permission_classes = (ReadOnly, )
+    # permission_classes = (ReadOnly, )
 
 
 # Verb
@@ -121,7 +121,7 @@ class VerbTranslateViewSets(viewsets.ModelViewSet):
 
     serializer_class = serializers.VerbTranslateSerializer
     queryset = models.English.objects.raw(query_text)
-    permission_classes = (ReadOnly, )
+    # permission_classes = (ReadOnly, )
 
 
 # # Wordbook

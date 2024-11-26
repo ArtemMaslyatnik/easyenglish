@@ -7,7 +7,7 @@
         {% block crumbs %}
           {% if title %} 
           <li class="breadcrumb-item"><a href="{% url url_list %}">{{title}}</a></li>
-          <li class="breadcrumb-item active" aria-current="page">{{detail.english}}</li>
+          <li class="breadcrumb-item active" aria-current="page">{{detail.name}}</li>
           {% endif %}
         {% endblock %}
       </ol>
