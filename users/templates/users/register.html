@@ -1,0 +1,20 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+<h1>Регистрация</h1>
+<hr>
+<form method="post">
+    {% csrf_token %}
+    {% comment %} <input type="hidden" name="next" value="{{ next }}" /> {% endcomment %}
+    <div class="form-error">{{ form.non_field_errors }}</div>
+    {% for f in form %}
+        <label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}
+        <div class="form-error">{{ f.errors }}</div>
+    {% endfor %}
+    <hr>
+    <button class="btn btn-outline-success" type="submit">Регистрация</button>
+    <hr>
+</form>
+{% endblock %}
+
+

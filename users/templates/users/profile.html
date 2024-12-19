@@ -1,0 +1,30 @@
+{% extends 'base_generic.html' %}
+{% block content %}
+<h1>Профиль</h1>
+<hr>
+<form  method="post" enctype="multipart/form-data">
+    {% csrf_token %}
+    {% if user.photo %}
+    <img src="{{ user.photo.url }}">
+    {% else %}
+    <img src="{{  default_image  }}">
+    {% endif %}
+
+    <div class="form-error">{{ form.non_field_errors }}</div>
+    {% for f in form %}
+    <label  for="{{ f.id_for_label }}">{{f.label}}: </label>{{ f }}
+    <div class="form-error">{{ f.errors }}</div>
+    {% endfor %}
+    <hr>
+    <button class="btn btn-outline-success" type="submit">Сохранить</button>
+</form>
+
+<hr>
+<a class="d-flex align-items-center" href="{% url 'users:password_change' %}">Сменить пароль</a>
+<hr>
+<form action ="{% url 'users:logout'%}" method="post">
+    {% csrf_token %}
+    <button class="btn btn-outline-danger" type="submit">Выход</button>
+</form>
+<hr>
+{% endblock %}

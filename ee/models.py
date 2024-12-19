@@ -1,5 +1,5 @@
 from django.db import models
-from django.contrib.auth.models import User
+from django.contrib.auth import get_user_model
 
 
 # Words
@@ -157,7 +157,7 @@ class Wordbook(models.Model):
     id = models.AutoField
     english = models.ForeignKey(English,
                                 on_delete=models.CASCADE)
-    user = models.ForeignKey(User,
+    user = models.ForeignKey(get_user_model(),
                              on_delete=models.SET_NULL,
                              null=True,
                              blank=True)
@@ -175,7 +175,7 @@ class Comment(models.Model):
     english = models.ForeignKey(English,
                                 on_delete=models.CASCADE,
                                 null=True)
-    user = models.ForeignKey(User,
+    user = models.ForeignKey(get_user_model(),
                              on_delete=models.SET_NULL,
                              null=True,
                              blank=True)

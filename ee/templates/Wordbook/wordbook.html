@@ -30,7 +30,7 @@
         </h4>
         <div class="btn-add" >
           {% if user.is_authenticated %}
-            <form id="create-wordbook" method="post"> 
+            <form method="post" data-wb='1'> 
               <input type="hidden" id="url-wordbook" data-url="{% url 'ee:create_wordbook' item.pk %}"  value="{{item.english.id }}"
               name="path"/>
               <input type="hidden" value="wordbook"

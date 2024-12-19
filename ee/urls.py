@@ -1,20 +1,13 @@
-from django.urls import path
+from django.urls import include, path
 from ee import views
 
 
 app_name = 'ee'
 
 urlpatterns = [
-     # Для статики????
-     # path('', TemplateView.as_view(template_name="ee/templates/index.html")),
-     # path('index/',
-     # TemplateView.as_view(template_name="ee/templates/index.html")),
      path('index',
           views.index,
           name='index'),
-     path('logout',
-          views.logout_view,
-          name='logout'),
      path('english_words/',
           views.EnglishWordListView.as_view(),
           name='english_words'),

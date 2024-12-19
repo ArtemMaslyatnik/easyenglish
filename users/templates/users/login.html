@@ -1,0 +1,21 @@
+{% extends 'base_generic.html' %}
+
+{% block content %}
+<h1>Авторизация</h1>
+<hr>
+<form method="post">
+    {% csrf_token %}
+    <input type="hidden" name="next" value="{{ next }}" />
+    <div class="form-error">{{ form.non_field_errors }}</div>
+    {% for f in form %}
+    <label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}
+    <div class="form-error">{{ f.errors }}</div>
+    {% endfor %}
+    <hr>
+    <button class="btn btn-outline-success" type="submit">Войти</button></p>
+    <hr>
+    <a class="d-flex align-items-center" href="{% url 'users:register' %}">Регистрация</a>
+    <a class="d-flex align-items-center" href="{% url 'users:password_reset' %}">Забыли пароль?</a>
+    <hr>
+</form>
+{% endblock %}

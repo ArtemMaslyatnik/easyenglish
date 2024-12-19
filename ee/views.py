@@ -8,6 +8,7 @@ from bs4 import BeautifulSoup
 from django.forms import model_to_dict
 from django.http import HttpResponseRedirect, JsonResponse
 from django.shortcuts import render
+from core import settings
 from ee import models
 from django.views import generic
 import pandas as pd
@@ -15,7 +16,7 @@ from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ee.forms import UploadFileForm
 from django.core.serializers import serialize
-from django.contrib.auth import logout
+from django.contrib.auth import logout, login
 
 
 # Create your views here.
@@ -38,6 +39,16 @@ def index(request):
 def logout_view(request):
 
     logout(request)
+
+    return render(
+        request,
+        'index.html',
+    )
+
+
+def login_view(request):
+
+    login(request, user)
 
     return render(
         request,
@@ -130,11 +141,13 @@ class WordDetailView(generic.DetailView):
             'previous': models.English.objects.all().filter(
                 id__lt=self.object.id
             ).order_by('id').last(),
+            'title': 'Слова по релевантности',
+            'url_list': 'ee:english_words',
+            'url_word': 'ee:word_detail',
+            'url_create_word': 'ee:create_wordbook',
+            'default_image': settings.DEFAULT_USER_IMAGE,
         })
-        context['title'] = 'Слова по релевантности'
-        context['url_list'] = 'ee:english_words'
-        context['url_word'] = 'ee:word_detail'
-        context['url_create_word'] = 'ee:create_wordbook'
+
         return context
 
 
@@ -522,11 +535,11 @@ class Comment():
             idCard = re.findall(r'\b\d+\b', request.path)
             idParent = request.POST.get('parent-comment')
             newComment = models.Comment.objects.create(
-                english_id=idCard[0] if idParent == idCard else None,
+                english_id=idCard[0] if idParent == idCard[0] else None,
                 user_id=request.user.id,
                 text=request.POST.get('text'),
                 active=True,
-                parent_id=None if idParent == idCard else idParent
+                parent_id=None if idParent == idCard[0] else idParent
             )
             comment = model_to_dict(newComment)
             comment['created'] = newComment.created.strftime("%d.%m.%y")
@@ -929,8 +942,9 @@ def import_from_excel(request):
         excel_file = request.FILES['excel_file']
 
         df = pd.read_excel(excel_file)
+        # processdfEng(df)
         processdf(df)
-        # processdfEngRW(df)
+        processdfEngRW(df)
 
     return render(request, 'import_success.html')
 
@@ -1149,13 +1163,13 @@ def processdf(df):
 
     for row in df.itertuples():
         id = row[1]
-        tr_noun = str(row[2])
-        tr_verb = str(row[3])
-        tr_pronoun = str(row[4])
-        tr_adjective = str(row[5])
-        tr_adverb = str(row[6])
-        tr_preposition = str(row[7])
-        tr_conjunction = str(row[8])
+        tr_noun = str(row[4])
+        tr_verb = str(row[5])
+        tr_pronoun = str(row[6])
+        tr_adjective = str(row[7])
+        tr_adverb = str(row[8])
+        tr_preposition = str(row[9])
+        tr_conjunction = str(row[10])
 
         obj_english = models.English.objects.get(pk=id)
 
@@ -1222,8 +1236,9 @@ def processdf(df):
 def processdfEng(df):
 
     for row in df.itertuples():
+
+        ngsl_number = row[1]
         engl = str(row[2])
-        ngsl_number = row[3]
 
         with transaction.atomic():
             models.English.objects.create(
@@ -1237,7 +1252,7 @@ def processdfEngRW(df):
 
     for row in df.itertuples():
         id = row[1]
-        strword = str(row[2])
+        strword = str(row[3])
         if len(strword) > 0 and strword != 'nan':
             with transaction.atomic():
                 fObjEnglish = models.English.objects.get(pk=id)

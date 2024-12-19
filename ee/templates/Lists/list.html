@@ -29,7 +29,7 @@
             <audio controls src="{% static  item.sound_path %}"  type="audio/mpeg"></audio>
             <div class="btn-add" >
               {% if user.is_authenticated %}
-                <form id="create-wordbook" method="post"> 
+                <form method="post" data-wb='1'> 
                   <input type="hidden" id="url-wordbook" data-url="{% url 'ee:create_wordbook' item.pk %}"  value="{{item.english.id }}"
                   name="path"/>
                   {% csrf_token %}
@@ -63,7 +63,7 @@
           <audio controls src="{% static  item.sound_path %}"  type="audio/mpeg"></audio>
           <div class="btn-add" >
             {% if user.is_authenticated %}
-              <form method="post"> 
+              <form method="post" data-wb='1'> 
                 <input type="hidden" id="url-wordbook" data-url="{% url 'ee:create_wordbook' item.pk %}"  value="{{ item.pk }}"
                 name="path"/>
                 {% csrf_token %}
