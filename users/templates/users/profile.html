@@ -5,9 +5,13 @@
 <form  method="post" enctype="multipart/form-data">
     {% csrf_token %}
     {% if user.photo %}
-    <img src="{{ user.photo.url }}">
+    <img class="rounded-circle shadow-1-strong me-3"
+    src="{{ user.photo.url }}" alt="avatar" width="65"
+    height="65" />
     {% else %}
-    <img src="{{  default_image  }}">
+    <img class="rounded-circle shadow-1-strong me-3"
+    src="{{  default_image  }}" alt="avatar" width="65"
+    height="65" />
     {% endif %}
 
     <div class="form-error">{{ form.non_field_errors }}</div>

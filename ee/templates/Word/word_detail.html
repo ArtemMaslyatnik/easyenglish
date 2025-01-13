@@ -158,7 +158,7 @@
                                 <p class="mb-1">
                                   {{item.user}}<span class="small"> {{item.created|date:"d.m.y" }}</span>
                                 </p>
-                                <a href="#" class ="sub-comment-link" id="sub-comment-{{item.id}}"><i class="fas fa-reply fa-xs"></i><span class="small"> reply</span></a>
+                                <a href="#" class ="sub-comment-link" id="sub-comment-{{item.id}}"><i class="fas fa-reply fa-xs"></i><span class="small"> ответ</span></a>
                               </div>
                               <p class="small mb-0">
                                 {{ item.text }}
@@ -167,28 +167,28 @@
                             {% if item.subComment %}
                             {% for item in item.subComment %}
                               <div class="d-flex flex-start mt-4">
-                                <a class="me-3" href="#">
-                                  <div class="d-flex flex-start">
-                                    {% if user.photo %}
+                                <div class="d-flex flex-start">
+                                    {% if item.user.photo %}
                                     <img class="rounded-circle shadow-1-strong me-3"
-                                    src="{{ user.photo.url }}" alt="avatar" width="65"
+                                    src="{{ item.user.photo.url }}" alt="avatar" width="65"
                                     height="65" />
                                     {% else %}
                                     <img class="rounded-circle shadow-1-strong me-3"
                                     src="{{  default_image  }}" alt="avatar" width="65"
                                     height="65" />
                                     {% endif %}
-                                <div class="flex-grow-1 flex-shrink-1">
-                                  <div>
-                                    <div class="d-flex justify-content-between align-items-center">
-                                      <p class="mb-1">
-                                        {{item.user}}<span class="small"> {{item.created|date:"d.m.y" }}</span>
-                                      </p>
+                                    <div class="flex-grow-1 flex-shrink-1">
+                                      <div>
+                                        <div class="d-flex justify-content-between align-items-center">
+                                          <p class="mb-1">
+                                            {{item.user}}<span class="small"> {{item.created|date:"d.m.y" }}</span>
+                                          </p>
+                                        </div>
+                                        <p class="small mb-0">
+                                          {{item.text}}
+                                        </p>
+                                      </div>
                                     </div>
-                                    <p class="small mb-0">
-                                      {{item.text}}
-                                    </p>
-                                  </div>
                                 </div>
                               </div>
                             {% endfor %}
