@@ -88,12 +88,10 @@ $(document).on("click", "#btn-create-sub-comment", function (e) {
   //    dataType: 'html', // если успешно, то
 
       success: function (response) {
-        let StrComment = getStrComment(response.comment)
+        let StrComment = getSubStrComment(response.comment)
         $('#comment-parent-'+ response.comment.parent +'').append(StrComment);
         $('#textarea-sub-comment').val('');
-        
-
-      },
+       },
       // если ошибка, то
       error: function (response) {
         // предупредим об ошибке
@@ -225,7 +223,7 @@ function getStrComment(comment){
   + '<div class="col">'
   + '  <div class="d-flex flex-start">'
   + '    <img class="rounded-circle shadow-1-strong me-3"'
-  + '      src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp" alt="avatar" width="65"'
+  + '      src="' + comment.image + '" alt="avatar" width="65"'
   + '      height="65" />'
   + '    <div class="flex-grow-1 flex-shrink-1">'
   + '      <div>'
@@ -233,7 +231,7 @@ function getStrComment(comment){
   + '          <p class="mb-1">'
   +             comment.user +'<span class="small"> ' + comment.created +'</span>'
   + '          </p>'
-  + '          <a href="#!"><i class="fas fa-reply fa-xs"></i><span class="small"> reply</span></a>'
+  + '          <a href="#!"><i class="fas fa-reply fa-xs"></i><span class="small">ответ</span></a>'
   + '        </div>'
   + '        <p class="small mb-0">'
   +            comment.text 
@@ -265,7 +263,7 @@ function getSubStrComment(comment){
   + '<div class="col">'
   + '  <div class="d-flex flex-start">'
   + '    <img class="rounded-circle shadow-1-strong me-3"'
-  + '      src="https://mdbcdn.b-cdn.net/img/Photos/Avatars/img%20(10).webp" alt="avatar" width="65"'
+  + '      src="' + comment.image + '" alt="avatar" width="65"'
   + '      height="65" />'
   + '    <div class="flex-grow-1 flex-shrink-1">'
   + '      <div>'
@@ -273,7 +271,6 @@ function getSubStrComment(comment){
   + '          <p class="mb-1">'
   +             comment.user +'<span class="small"> ' + comment.created +'</span>'
   + '          </p>'
-  + '          <a href="#!"><i class="fas fa-reply fa-xs"></i><span class="small"> reply</span></a>'
   + '        </div>'
   + '        <p class="small mb-0">'
   +            comment.text 

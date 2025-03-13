@@ -1,4 +1,5 @@
 import json
+import os
 import re
 import string
 import time
@@ -12,11 +13,11 @@ from core import settings
 from ee import models
 from django.views import generic
 import pandas as pd
-from django.db import transaction
 from django.contrib.auth.mixins import LoginRequiredMixin
 from ee.forms import UploadFileForm
 from django.core.serializers import serialize
 from django.contrib.auth import logout, login
+from ee.general_purpose import set_sound_path
 
 
 # Create your views here.
@@ -90,23 +91,23 @@ class WordDetailView(generic.DetailView):
     model = models.English
     context_object_name = 'detail'
 
-    def getComments(self):
-        SetComments = models.Comment.objects.all().filter(
-            english=self.object
-        )
-        listComment = []
-        for item in SetComments:
-            strComment = {'id': item.id,
-                          'text': item.text,
-                          'user': item.user,
-                          'created': item.created,
-                          'active': item.active,
-                          'subComment': models.Comment.objects.all().filter(
-                              parent_id=item.id
-                          )
-                          }
-            listComment.append(strComment)
-        return listComment
+    # def getComments(self):
+    #     SetComments = models.Comment.objects.all().filter(
+    #         english=self.object
+    #     )
+    #     listComment = []
+    #     for item in SetComments:
+    #         strComment = {'id': item.id,
+    #                       'text': item.text,
+    #                       'user': item.user,
+    #                       'created': item.created,
+    #                       'active': item.active,
+    #                       'subComment': models.Comment.objects.all().filter(
+    #                           parent_id=item.id
+    #                       )
+    #                       }
+    #         listComment.append(strComment)
+    #     return listComment
 
     def get_context_data(self, **kwargs):
         # Call the base implementation first to get a context
@@ -134,7 +135,7 @@ class WordDetailView(generic.DetailView):
             'wordbook': models.Wordbook.objects.all().filter(
                 english=self.object,
                 user_id=self.request.user.id),
-            'comments': self.getComments(),
+            'comments': getComments(self.object),
             'next': models.English.objects.all().filter(
                 id__gt=self.object.id
             ).order_by('id').first(),
@@ -505,6 +506,7 @@ class WordbookDetailView(LoginRequiredMixin, generic.DetailView):
                 english=self.object.english,
                 user_id=self.request.user.id
             ),
+            'comments': getComments(self.object.english),
             'next': models.Wordbook.objects.all().filter(
                 user_id=self.request.user.id,
                 english__gt=self.object.english
@@ -532,18 +534,23 @@ class Comment():
     def create(self, request, pk):
 
         if request.method == "POST" and self.is_ajax(request):
-            idCard = re.findall(r'\b\d+\b', request.path)
-            idParent = request.POST.get('parent-comment')
+            idParent = re.findall(r'\b\d+\b', request.path)
+            idWord = request.POST.get('word_id')
             newComment = models.Comment.objects.create(
-                english_id=idCard[0] if idParent == idCard[0] else None,
+                english_id=idWord,
                 user_id=request.user.id,
                 text=request.POST.get('text'),
                 active=True,
-                parent_id=None if idParent == idCard[0] else idParent
+                parent_id=idParent[0] if idWord is None else None
             )
             comment = model_to_dict(newComment)
             comment['created'] = newComment.created.strftime("%d.%m.%y")
             comment['user'] = newComment.user.username
+            if newComment.user.photo:
+                photo = newComment.user.photo.url
+            else:
+                photo = settings.DEFAULT_USER_IMAGE
+            comment['image'] = photo
             response = {
                 'comment': comment
             }
@@ -654,11 +661,8 @@ class BookDetailView(generic.DetailView):
 
 # ############################ Function handler################################
 def universal(request):
-    for obj in models.English.objects.all():
-        if obj.sound_path.name.find('audio') >= 0:
-            sound_path = obj.sound_path.name
-            new_sound_path = sound_path.replace('audio', 'media')
-            models.English.objects.all().filter(pk=obj.id).update(sound_path=new_sound_path)
+
+    set_sound_path()
 
     return render(request, 'import_success.html')
 
@@ -681,7 +685,7 @@ def get_content(request):
         count += 1
         if count > 1:
             break
-        page = "https://wooordhunt.ru/word/" + obj.name
+        page = "https://" + obj.name
         req = requests.get(page, headers)
         time.sleep(10)
         # считываем текст HTML-документа
@@ -892,24 +896,6 @@ def get_content(request):
     return render(request, 'import_success.html')
 
 
-# updates table English after parsing
-def alter_dic(request):
-    query_text = (' SELECT 1 as id, serv.english, dic.name,  serv.transcription_use, serv.sound_path, serv.sound_path'
-                  ' FROM ee_serv AS serv'
-                  '     RIGHT JOIN ee_english AS dic'
-                  '     ON lower(serv.english)  = dic.name'
-                  ' GROUP BY  serv.english,dic.name, serv.transcription_use, serv.sound_path'
-                  ' ORDER BY "english"')
-
-    for obj in models.English.objects.raw(query_text):
-        find_obj = models.English.objects.all().filter(name=obj.name)
-        transcription = "" if obj.transcription_use is None else obj.transcription_use
-        sound_path = "" if obj.sound_path is None else obj.sound_path
-        find_obj.update(transcription=transcription, sound_path=sound_path)
-
-    return render(request, 'import_success.html')
-
-
 # fix content
 def export_excel(request):
     # create DataFrame
@@ -937,16 +923,7 @@ def export_excel(request):
 # -- parsing
 
 
-def import_from_excel(request):
-    if request.method == 'POST':
-        excel_file = request.FILES['excel_file']
 
-        df = pd.read_excel(excel_file)
-        # processdfEng(df)
-        processdf(df)
-        processdfEngRW(df)
-
-    return render(request, 'import_success.html')
 
 
 # Book content
@@ -967,6 +944,24 @@ def upload_file(request):
 
 
 # ################################ Servis ###################################
+def getComments(id):
+    SetComments = models.Comment.objects.all().filter(
+        english=id
+    )
+    listComment = []
+    for item in SetComments:
+        strComment = {'id': item.id,
+                      'text': item.text,
+                      'user': item.user,
+                      'created': item.created,
+                      'active': item.active,
+                      'subComment': models.Comment.objects.all().filter(
+                        parent_id=item.id)
+                      }
+        listComment.append(strComment)
+    return listComment
+
+
 # ++ Book content
 def handle_uploaded_file(f):
     numberPage = 0
@@ -1158,112 +1153,4 @@ def getJsonList(queryset):
     return serialized_data
 
 
-# ++ upload word
-def processdf(df):
 
-    for row in df.itertuples():
-        id = row[1]
-        tr_noun = str(row[4])
-        tr_verb = str(row[5])
-        tr_pronoun = str(row[6])
-        tr_adjective = str(row[7])
-        tr_adverb = str(row[8])
-        tr_preposition = str(row[9])
-        tr_conjunction = str(row[10])
-
-        obj_english = models.English.objects.get(pk=id)
-
-        with transaction.atomic():
-            if len(tr_noun) > 0 and tr_noun != 'nan':
-                arr = tr_noun.split(',')
-                for item in arr:
-                    item = item.strip()
-                    obj_rus = models.Russian.objects.create(name=item.capitalize())
-                    models.Noun.objects.create(
-                        english=obj_english,
-                        russian=obj_rus)
-            if len(tr_verb) > 0 and tr_verb != 'nan':
-                arr = tr_verb.split(',')
-                for item in arr:
-                    item = item.strip()
-                    obj_rus = models.Russian.objects.create(name=item.capitalize())
-                    models.Verb.objects.create(
-                        english=obj_english,
-                        russian=obj_rus)
-            if len(tr_pronoun) > 0 and tr_pronoun != 'nan':
-                arr = tr_pronoun.split(',')
-                for item in arr:
-                    item = item.strip()
-                    obj_rus = models.Russian.objects.create(name=item.capitalize())
-                    models.Pronoun.objects.create(
-                        english=obj_english,
-                        russian=obj_rus)
-            if len(tr_adjective) > 0 and tr_adjective != 'nan':
-                arr = tr_adjective.split(',')
-                for item in arr:
-                    item = item.strip()
-                    obj_rus = models.Russian.objects.create(name=item.capitalize())
-                    models.Adjective.objects.create(
-                        english=obj_english,
-                        russian=obj_rus)
-            if len(tr_adverb) > 0 and tr_adverb != 'nan':
-                arr = tr_adverb.split(',')
-                for item in arr:
-                    item = item.strip()
-                    obj_rus = models.Russian.objects.create(name=item.capitalize())
-                    models.Adverb.objects.create(
-                        english=obj_english,
-                        russian=obj_rus)
-            if len(tr_preposition) > 0 and tr_preposition != 'nan':
-                arr = tr_preposition.split(',')
-                for item in arr:
-                    item = item.strip()
-                    obj_rus = models.Russian.objects.create(name=item.capitalize())
-                    models.Preposition.objects.create(
-                        english=obj_english,
-                        russian=obj_rus)
-            if len(tr_conjunction) > 0 and tr_conjunction != 'nan':
-                arr = tr_conjunction.split(',')
-                for item in arr:
-                    item = item.strip()
-                    obj_rus = models.Russian.objects.create(name=item.capitalize())
-                    models.Conjunction.objects.create(
-                        english=obj_english,
-                        russian=obj_rus)
-
-
-# insert data at tabla english
-def processdfEng(df):
-
-    for row in df.itertuples():
-
-        ngsl_number = row[1]
-        engl = str(row[2])
-
-        with transaction.atomic():
-            models.English.objects.create(
-                name=engl,
-                ngsl_number=ngsl_number
-            )
-
-
-# insert data at tabla relative words
-def processdfEngRW(df):
-
-    for row in df.itertuples():
-        id = row[1]
-        strword = str(row[3])
-        if len(strword) > 0 and strword != 'nan':
-            with transaction.atomic():
-                fObjEnglish = models.English.objects.get(pk=id)
-                arr = strword.split(',')
-                for item in arr:
-                    item = item.strip()
-                    newObjREW = models.RelatedEnglishWord.objects.create(
-                        name=item.title()
-                    )
-                    models.RelatedWord.objects.create(
-                        english_id=fObjEnglish.id,
-                        relate_english_word_id=newObjREW.id
-                    )
-# -- upload word
