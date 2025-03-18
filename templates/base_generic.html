@@ -49,9 +49,6 @@
                     </a>
                     <ul class="dropdown-menu">
                       <li><a class="dropdown-item" href="{% url 'ee:universal' %}">Universal</a></li>
-                      <li><a class="dropdown-item" href="{% url 'ee:get_content' %}">Pars</a></li>
-                      <li><a class="dropdown-item" href="{% url 'ee:export_excel' %}">Export</a></li>
-                      <li><a class="dropdown-item" href="{% url 'ee:alter_dic' %}">Alter_dic</a></li>
                     </ul>
                   </li>
                   <li class="nav-item dropdown">
@@ -89,13 +86,13 @@
     <main role="main" class="container ">
       <div class="row">
         <div class="col-sm-2">
-
+             <!-- excel 
               <form action ="import/" method="post" enctype="multipart/form-data">
               {% csrf_token %}
               <input type="file" name="excel_file">
               <button type="submit">Import</button>
              </form>
-             <!-- excel           
+          
             <form action ="upload-file/" method="post" enctype="multipart/form-data">
               {% csrf_token %}
               <input type="text" name="title">
