@@ -467,7 +467,7 @@ def import_from_excel(request):
 
         df = pd.read_excel(excel_file)
         # processdfEng(df)
-        processdf(df)
+        # processdf(df)
         processdfEngRW(df)
 
 

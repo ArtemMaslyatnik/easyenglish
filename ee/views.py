@@ -4,13 +4,13 @@ import string
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import render
-from core import settings
+from config import settings
 from ee import models
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.serializers import serialize
 from django.contrib.auth import logout, login
-from ee.general_purpose import get_content
+from ee.general_purpose import get_content, import_from_excel
 
 
 # Create your views here.
@@ -655,7 +655,7 @@ class BookDetailView(generic.DetailView):
 # ############################ Function handler################################
 def universal(request):
 
-    get_content(request)
+    import_from_excel(request)
 
     return render(request, 'import_success.html')
 
