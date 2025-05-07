@@ -43,6 +43,7 @@
                   {% endif %}
                   <li class="nav-item"><a class="nav-link" href="{% url 'ee:english_words' %}">Слова по релевантности</a></li>
                   <li class="nav-item"><a class="nav-link" href="{% url 'ee:book_list' %}">Книги</a></li>
+                  <!--  
                   <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                       Процедуры
@@ -51,6 +52,7 @@
                       <li><a class="dropdown-item" href="{% url 'ee:universal' %}">Universal</a></li>
                     </ul>
                   </li>
+                -->
                   <li class="nav-item dropdown">
                     <a class="nav-link dropdown-toggle" href="#" role="button" data-bs-toggle="dropdown" aria-expanded="false">
                       Части речи
@@ -63,10 +65,6 @@
                       <li><a class="dropdown-item" href="{% url 'ee:prepositions' %}">Предлоги</a></li>
                       <li><a class="dropdown-item" href="{% url 'ee:pronouns' %}">Местоимения</a></li>
                       <li><a class="dropdown-item" href="{% url 'ee:verbs' %}">Глаголы</a></li>
-                      <li>
-                        <hr class="dropdown-divider">
-                      </li>
-                      <li><a class="dropdown-item" href="#">Something else here</a></li>
                     </ul>
                   </li>
                 </ul>
@@ -86,13 +84,13 @@
     <main role="main" class="container ">
       <div class="row">
         <div class="col-sm-2">
-              
+   <!-- excel   
               <form action ="import/" method="post" enctype="multipart/form-data">
               {% csrf_token %}
               <input type="file" name="excel_file">
               <button type="submit">Import</button>
              </form>
-          <!-- excel 
+                   
             <form action ="upload-file/" method="post" enctype="multipart/form-data">
               {% csrf_token %}
               <input type="text" name="title">

@@ -3,6 +3,7 @@
 {% block content %}
   <h1>{{ detail.name }} </h1>
   <h6>{{ detail.transcription }}</h6>
+  <div>{{detail.example}}</div>
     {% load static %}
   <audio controls src="{% static  detail.sound_path %}"  type="audio/mpeg"></audio>
   <div class="bd-example-snippet bd-code-snippet">

@@ -19,6 +19,7 @@ class English(models.Model):
     ngsl_number = models.SmallIntegerField()
     transcription = models.CharField(max_length=30, blank=True, default='')
     sound_path = models.FileField(upload_to='media/')
+    example = models.CharField(max_length=256, blank=True, default='')
 
     class Meta:
         ordering = ["id"]

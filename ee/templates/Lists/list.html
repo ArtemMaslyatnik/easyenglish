@@ -61,6 +61,7 @@
           <a href="{% url url_word item.pk %}">{{ item.pk  }}. {{ item.name  }} {{ item.transcription  }}</a>
           {% load static %}
           <audio controls src="{% static  item.sound_path %}"  type="audio/mpeg"></audio>
+          <div>{{item.example}}</div>
           <div class="btn-add" >
             {% if user.is_authenticated %}
               <form method="post" data-wb='1'> 

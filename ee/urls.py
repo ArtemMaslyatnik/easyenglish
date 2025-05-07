@@ -1,6 +1,5 @@
 from django.urls import path
-from ee import views
-
+from ee import views, general_purpose
 
 app_name = 'ee'
 
@@ -41,11 +40,8 @@ urlpatterns = [
      path('universal/',
           views.universal,
           name='universal'),
-     # path('content/',
-     #      views.get_content,
-     #      name='get_content'),
      path('import/',
-          views.import_from_excel,
+          general_purpose.import_from_excel,
           name='import_from_excel'),
      # path('export/',
      #      views.export_excel,

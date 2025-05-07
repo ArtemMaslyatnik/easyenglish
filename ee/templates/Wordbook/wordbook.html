@@ -27,6 +27,7 @@
           {% load static %}
           {{item.english.transcription}} 
           <audio controls src="{% static  item.english.sound_path %}"  type="audio/mpeg"></audio>
+          <div>{{item.english.example}}</div>
         </h4>
         <div class="btn-add" >
           {% if user.is_authenticated %}

@@ -17,6 +17,7 @@
 {% block content %}
   <h1>{{ detail.english.name }} </h1>
   <h6>{{ detail.english.transcription }}</h6>
+  <div>{{detail.english.example}}</div>
     {% load static %}
   <audio controls src="{% static  detail.english.sound_path %}"  type="audio/mpeg"></audio>
   <div class="bd-example-snippet bd-code-snippet">

@@ -175,8 +175,8 @@ def get_content(request):
         "User-Agent": st_useragent,
     }
     # отправляем запрос с заголовками по нужному адресу
-    count = 0
-    queryset = models.English.objects.all().filter(id__gt=2)
+    count = 706
+    queryset = models.English.objects.all().filter(id__gt=2701)
     for obj in queryset:
         count += 1
         if count > 2801:
@@ -447,8 +447,8 @@ def alter_dic():
     for obj in models.English.objects.raw(query_text):
         find_obj = models.English.objects.all().filter(name=obj.name)
         transcription = "" if obj.transcription_use is None else obj.transcription_use
-        sound_path = "" if obj.sound_path is None else obj.sound_path
-        find_obj.update(transcription=transcription, sound_path=sound_path)
+        # sound_path = "" if obj.sound_path is None else obj.sound_path
+        find_obj.update(transcription=transcription)
 
     return True
 
@@ -465,10 +465,11 @@ def import_from_excel(request):
     if request.method == 'POST':
         excel_file = request.FILES['excel_file']
 
-        df = pd.read_excel(excel_file)
+        # df = pd.read_excel(excel_file)
         # processdfEng(df)
         # processdf(df)
-        processdfEngRW(df)
+        # processdfEngRW(df)
+        # set_example(df)
 
 
 # ++ upload word
@@ -558,6 +559,20 @@ def processdfEng(df):
                 name=engl,
                 ngsl_number=ngsl_number
             )
+
+
+# insert data at tabla english
+def set_example(df):
+
+    for row in df.itertuples():
+        id = row[1]
+        example = row[2]
+
+        find_obj = models.English.objects.all().filter(id=id)
+        example = "" if example is None else example
+        find_obj.update(example=example)
+
+    return True
 
 
 # insert data at tabla relative words
