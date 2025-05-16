@@ -10,7 +10,7 @@ from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.serializers import serialize
 from django.contrib.auth import logout, login
-from ee.general_purpose import alter_dic, get_content, import_from_excel
+from ee.general_purpose import alter_dic, export_excel, get_content, import_from_excel
 
 
 # Create your views here.
@@ -658,7 +658,7 @@ def universal(request):
     # alter_dic()
     # get_content(request)
     # import_from_excel(request)
-
+    export_excel(request)
     return render(request, 'import_success.html')
 
 

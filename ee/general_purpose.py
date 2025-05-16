@@ -394,23 +394,31 @@ def get_content(request):
 # fix content
 def export_excel(request):
     # create DataFrame
-    query_text = ('SELECT serv.english, dic.name,  dic.id'
-                  ' FROM ee_serv AS serv'
-                  '     RIGHT JOIN ee_english AS dic'
-                  '     ON lower(serv.english)  = dic.name'
-                  ' WHERE serv.english IS NULL'
-                  ' GROUP BY serv.english, dic.name, dic.id'
-                  ' ORDER BY "english" desc'
-                  ' LIMIT 100')
-
+    # query_text = ('SELECT serv.english, dic.name,  dic.id'
+    #               ' FROM ee_serv AS serv'
+    #               '     RIGHT JOIN ee_english AS dic'
+    #               '     ON lower(serv.english)  = dic.name'
+    #               ' WHERE serv.english IS NULL'
+    #               ' GROUP BY serv.english, dic.name, dic.id'
+    #               ' ORDER BY "english" desc'
+    #               ' LIMIT 100')
     english_list = []
     name_list = []
     id_list = []
-    for obj in models.English.objects.raw(query_text):
-        english_list.append(obj.english)
+    sound_path_list = []
+    transcription_list = []
+    for obj in models.English.objects.all():
+        english_list.append(obj.name)
         name_list.append(obj.name)
         id_list.append(obj.id)
-    dic = {'english': english_list, 'name': name_list, 'id': id_list}
+        sound_path_list.append(obj.sound_path)
+        transcription_list.append(obj.transcription)
+    dic = {'english': english_list,
+           'name': name_list,
+           'id': id_list,
+           'sound_path': sound_path_list,
+           'transcription': transcription_list}
+
     df = pd.DataFrame(dic)
     df.to_excel(r'C:\Users\lykov\Documents\mydata.xlsx')
 
