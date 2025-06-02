@@ -1,0 +1,9 @@
+.vscode/* 
+EasyEnglish/__pycache__
+EasyEnglish/config/__pycache__
+EasyEnglish/ee/__pycache__
+EasyEnglish/ee_api/__pycache__
+EasyEnglish/users/__pycache__
+EasyEnglish/ee_api/__pycache__
+EasyEnglish/venv
+.env
