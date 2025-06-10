@@ -6,7 +6,7 @@ source venv/bin/activate
 python manage.py runserver
 python manage.py makemigrations ee
 python manage.py migrate
-
+python manage.py collectstatic
 
 
 
@@ -55,5 +55,9 @@ fulfill
 Harbor
 
 docker-compose up --build
+
 docker compose exec easyenglish python manage.py migrate
+docker compose exec easyenglish python manage.py loaddata db.csv
+
+проверка psql
 docker exec -it psgr psql -U postgres

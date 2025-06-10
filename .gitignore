@@ -6,4 +6,5 @@ EasyEnglish/ee_api/__pycache__
 EasyEnglish/users/__pycache__
 EasyEnglish/ee_api/__pycache__
 EasyEnglish/venv
+EasyEnglish/media/*.mp3
 .env
