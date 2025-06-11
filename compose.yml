@@ -10,6 +10,8 @@ services:
     ports:
       - "80:8088"
     volumes:
+      - ./easyenglish/media:/home/easyenglish/media
+      - ./easyenglish/static:/home/easyenglish/static
       - ./nginx:/etc/nginx/conf.d
     depends_on:
       - easyenglish
