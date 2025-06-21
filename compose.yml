@@ -20,7 +20,7 @@ services:
     image: easyenglish
     container_name: easyenglish
     restart: always
-    command: "gunicorn -c gunicorn.py config.wsgi"
+    # command: "gunicorn -c gunicorn.py config.wsgi"
     env_file:
       - .env
     links:

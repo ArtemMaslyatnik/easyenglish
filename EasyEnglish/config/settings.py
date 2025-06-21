@@ -42,6 +42,7 @@ INSTALLED_APPS = [
     'ee_api',
     'rest_framework',
     'users',
+    'social_django',
 ]
 
 MIDDLEWARE = [
