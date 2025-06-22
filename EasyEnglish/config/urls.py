@@ -25,6 +25,7 @@ urlpatterns = [
     path('', include('ee.urls', namespace='ee')),
     path('api/', include('ee_api.urls', namespace='ee_api')),
     path('users/', include('users.urls', namespace="users")),
+    path('social-auth/', include('social_django.urls', namespace="social")),
 ]
 
 urlpatterns += static(settings.MEDIA_URL, document_root=settings.MEDIA_ROOT)

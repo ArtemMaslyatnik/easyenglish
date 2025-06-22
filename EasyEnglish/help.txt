@@ -64,3 +64,6 @@ docker compose exec easyenglish python manage.py loaddata db.csv
 
 проверка psql
 docker exec -it psgr psql -U postgres
+
+
+git reset HEAD~
