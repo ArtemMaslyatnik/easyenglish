@@ -1,18 +1,6 @@
 {% extends 'base_generic.html' %}
 
 {% block content %}
-<!-- <form method="post">
-    {% csrf_token %}
-    <input type="hidden" name="next" value="{{ next }}" />
-    <div class="form-error">{{ form.non_field_errors }}</div>
-    {% for f in form %}
-    <label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}
-    <div class="form-error">{{ f.errors }}</div>
-    {% endfor %}
-    <hr>
-    <button class="btn btn-outline-success" type="submit">Войти</button></p>
-</form> -->
- 
 <div class="modal-dialog"> 
     <div class="modal-content rounded-4 shadow"> 
         <div class="modal-header p-5 pb-4 border-bottom-0"> 
@@ -26,7 +14,7 @@
                 {% for f in form %}
                     <div class="form-floating mb-3"></div>
                     <!-- <input type="email" class="form-control rounded-3" id="floatingInput" placeholder="name@example.com">  -->
-                    <label class="form-label" for="{{ f.id_for_label }}">{{ f.label }}</label>{{ f }}
+                    <label class="form-label" for="{{ form.id_for_label }}">{{ form.label }}</label>{{ form.text }}
                     <div class="form-error">{{ f.errors }}</div>
                 {% endfor %}
                 

@@ -20,7 +20,6 @@ services:
     image: easyenglish
     container_name: easyenglish
     restart: always
-    # command: "gunicorn -c gunicorn.py config.wsgi"
     env_file:
       - .env
     links:
@@ -31,21 +30,27 @@ services:
       - ./easyenglish:/home/easyenglish
     ports:
       - "8000:8000"
+      - "5678:5678"
+    environment:
+      - DJANGO_DEBUG=true
     depends_on:
       - postgres
-  adminer:
-    image: adminer
-    container_name: adminer
+  pgadmin4:
+    image: dpage/pgadmin4
+    container_name: pgadmin4
+    environment: 
+      - PGADMIN_DEFAULT_EMAIL=${PGADMIN_EMAIL}
+      - PGADMIN_DEFAULT_PASSWORD=${PGADMIN_PASSWORD}
     ports:
-      - "8080:8080"
+      - "82:80"
     links:
       - "postgres:db"
     networks:
       - dbnet
     depends_on:
-      - postgres
+      - postgres      
   postgres:
-    image: postgres:17-alpine
+    image: postgres:16.9
     container_name: psgr
     volumes:
       - postgres-data:/var/lib/postgresql/data

@@ -181,7 +181,7 @@ def get_content(request):
         count += 1
         if count > 2801:
             break
-        page = "https://wooordhunt.ru/word/" + obj.name
+        page = "https://content/word/" + obj.name
         req = requests.get(page, headers, verify=False)
         time.sleep(10)
         # считываем текст HTML-документа
@@ -464,7 +464,9 @@ def alter_dic():
 # set sound path data
 def set_sound_path():
     for obj in models.English.objects.all():
-        models.English.objects.all().filter(pk=obj.id).update(sound_path='media\\' + obj.name + '.mp3')
+        # models.English.objects.all().filter(pk=obj.id).update(sound_path='media\\' + obj.name + '.mp3')
+        models.English.objects.all().filter(pk=obj.id).update(sound_path='/' + obj.sound_path.name.replace('\\','/'))
+        # models.English.objects.all().filter(pk=obj.id).update(sound_path=obj.sound_path.name.replace('\\','/') )
 
     return True
 
@@ -603,3 +605,7 @@ def processdfEngRW(df):
                         relate_english_word_id=newObjREW.id
                     )
 # -- upload word
+
+def text_analysisWord():
+
+    return True
