@@ -3,6 +3,7 @@ RUN groupadd -r groupdjango && useradd -r -g groupdjango userdj
 
 ENV PYTHONDONTWRITEBYTCODE=1
 ENV PYTHONUNBUFFERED=1
+# 1 ENV PYDEVD_DISABLE_FILE_VALIDATION=1
 
 RUN pip install --upgrade pip
 WORKDIR /home/easyenglish

@@ -4,13 +4,14 @@ import string
 from django.forms import model_to_dict
 from django.http import JsonResponse
 from django.shortcuts import render
+from django.urls import reverse_lazy
 from config import settings
-from ee import models
+from ee import models, forms
 from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.serializers import serialize
 from django.contrib.auth import logout, login
-from ee.general_purpose import alter_dic, export_excel, get_content, import_from_excel
+from ee.general_purpose import text_analysisWord, alter_dic, export_excel, get_content, import_from_excel, set_sound_path
 
 
 # Create your views here.
@@ -521,6 +522,21 @@ class WordbookDetailView(LoginRequiredMixin, generic.DetailView):
         return context
 
 
+# Text analysis
+def TextAnalysis(request):
+
+    if request.method == "POST":
+        form = forms.TextAnalysisForm(request.POST)
+        if form.is_valid():
+            text_analysisWord()
+            return render(request, 'text_analysis.html', {"form": form})
+
+    else:
+        form = forms.TextAnalysisForm()
+    
+    return render(request, "text_analysis.html", {"form": form})
+
+
 # Comment
 class Comment():
 
@@ -658,7 +674,8 @@ def universal(request):
     # alter_dic()
     # get_content(request)
     # import_from_excel(request)
-    export_excel(request)
+    # export_excel(request)
+    # set_sound_path()
     return render(request, 'import_success.html')
 
 

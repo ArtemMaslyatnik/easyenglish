@@ -24,9 +24,8 @@
         <hr/>
         <h4>
           <a href="{% url url_word item.id %}">{{ item.english.name  }} </a>
-          {% load static %}
           {{item.english.transcription}} 
-          <audio controls src="{% static  item.english.sound_path %}"  type="audio/mpeg"></audio>
+          <audio controls src="{{ item.english.sound_path }}"  type="audio/mpeg"></audio>
           <div>{{item.english.example}}</div>
         </h4>
         <div class="btn-add" >
