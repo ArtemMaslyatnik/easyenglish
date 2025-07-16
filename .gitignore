@@ -2,8 +2,11 @@
 easyenglish/__pycache__
 easyenglish/config/__pycache__
 easyenglish/ee/__pycache__
+easyenglish/ee/migrations/__pycache__
 easyenglish/ee_api/__pycache__
+easyenglish/ee_api/migrations/__pycache__
 easyenglish/users/__pycache__
+easyenglish/users/migrations/__pycache__
 easyenglish/ee_api/__pycache__
 easyenglish/venv
 easyenglish/media/*.mp3

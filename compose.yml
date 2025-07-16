@@ -33,9 +33,6 @@ services:
       - "5678:5678"
     environment:
       - DJANGO_DEBUG=true
-      - "5678:5678"
-    environment:
-      - DJANGO_DEBUG=true
     depends_on:
       - postgres
   pgadmin4:
