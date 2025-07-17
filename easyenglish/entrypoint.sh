@@ -5,7 +5,7 @@
 #python3 manage.py collectstatic --noinput
 # set -e
 # echo "Preparing database migrations"
-# python3 manage.py makemigrations
+# python3 manage.py makemigrations 1
 echo "Applying database migrations 2"
 python3 manage.py migrate --no-input
 if [ "$DJANGO_DEBUG" = "true" ]
