@@ -1,3 +1,4 @@
+import re
 import time
 import requests
 import urllib.request
@@ -606,6 +607,53 @@ def processdfEngRW(df):
                     )
 # -- upload word
 
-def text_analysisWord():
 
+# text analisys
+def text_analysisWord(form):
+
+    text_out = ''
+    form.data = form.data.copy()
+    form.data['a1'] = 0
+    form.data['a2'] = 0
+    form.data['b1'] = 0
+    form.data['other'] = 0
+    form.data['total'] = 0
+    form.data['text_out'] = ''
+
+    listWords = form.cleaned_data['text'].split()
+
+    if len(listWords) > 1000:
+        return 'Слишком много слов'
+
+    for element in listWords:
+        word = get_letters_only_re(element.lower())
+
+        if word == "":
+            continue
+
+        first_object = models.English.objects.all().filter(name=word).first()
+        if first_object is None:
+            first_object_rw = models.RelatedEnglishWord.objects.all().filter(name=word.title()).first()
+            if first_object_rw is not None:
+                first_object_rw = models.RelatedWord.objects.all().filter(relate_english_word=first_object_rw).first()
+                first_object = first_object_rw.english
+
+        if first_object is None:
+            form.data['other'] += 1
+            text_out = text_out + ' <'+element+'>'
+        elif first_object.id < 701:
+            form.data['a1'] += 1
+            text_out = text_out + ' ' + word
+        elif first_object.id > 700 and first_object.id < 1501:
+            form.data['a2'] += 1
+            text_out = text_out + ' ' + word
+        elif first_object.id > 1500 and first_object.id < 2803:
+            form.data['b1'] += 1
+            text_out = text_out + ' ' + word
+        form.data['total'] += 1
+    form.data['text_out'] = text_out
     return True
+
+
+def get_letters_only_re(text):
+    return re.sub(r'[^a-zA-Z]', '', text)

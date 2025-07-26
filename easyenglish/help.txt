@@ -56,7 +56,9 @@ Harbor
 
 очистить версиях
 docker system prune
-docker-compose up --build
+docker compose up --build
+docker compose up --build -d
+docker inspect
 
 docker compose exec easyenglish python manage.py migrate
 docker compose exec easyenglish python manage.py loaddata db.csv

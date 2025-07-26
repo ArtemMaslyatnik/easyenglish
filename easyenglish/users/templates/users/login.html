@@ -14,7 +14,7 @@
                 {% for f in form %}
                     <div class="form-floating mb-3"></div>
                     <!-- <input type="email" class="form-control rounded-3" id="floatingInput" placeholder="name@example.com">  -->
-                    <label class="form-label" for="{{ form.id_for_label }}">{{ form.label }}</label>{{ form.text }}
+                    <label class="form-label" for="{{ form.id_for_label }}">{{ f.label }}</label>{{ f }}
                     <div class="form-error">{{ f.errors }}</div>
                 {% endfor %}
                 

@@ -528,8 +528,8 @@ def TextAnalysis(request):
     if request.method == "POST":
         form = forms.TextAnalysisForm(request.POST)
         if form.is_valid():
-            text_analysisWord()
-            return render(request, 'text_analysis.html', {"form": form})
+            text_analysisWord(form)
+        return render(request, 'text_analysis.html', {"form": form})
 
     else:
         form = forms.TextAnalysisForm()

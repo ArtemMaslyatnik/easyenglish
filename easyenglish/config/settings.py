@@ -26,7 +26,7 @@ dict(environ)
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = environ.get("ALLOWED_HOSTS_DJANGO").split(" ")
+ALLOWED_HOSTS = environ.get("ALLOWED_HOSTS_DJANGO").split()
 
 
 # Application definition
