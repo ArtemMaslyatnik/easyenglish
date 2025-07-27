@@ -631,12 +631,7 @@ def text_analysisWord(form):
         if word == "":
             continue
 
-        first_object = models.English.objects.all().filter(name=word).first()
-        if first_object is None:
-            first_object_rw = models.RelatedEnglishWord.objects.all().filter(name=word.title()).first()
-            if first_object_rw is not None:
-                first_object_rw = models.RelatedWord.objects.all().filter(relate_english_word=first_object_rw).first()
-                first_object = first_object_rw.english
+        first_object = find_english_word(word)
 
         if first_object is None:
             form.data['other'] += 1
@@ -657,3 +652,27 @@ def text_analysisWord(form):
 
 def get_letters_only_re(text):
     return re.sub(r'[^a-zA-Z]', '', text)
+
+
+# server function
+def find_english_word(word):
+
+    f_object = models.English.objects.filter(name=word).first()
+    if f_object is None:
+        qs = models.RelatedWord.objects.filter(
+                                relate_english_word__name=word.title())
+        if len(qs) > 0:
+            f_object = qs.first().english
+    return f_object
+
+
+# server function
+def find_english_word_qs(word):
+
+    qs = models.English.objects.filter(name=word.lower())
+    if len(qs) == 0:
+        qs_rw = models.RelatedWord.objects.filter(
+                        relate_english_word__name=word.title())
+        if len(qs_rw) > 0:
+            qs = models.English.objects.filter(name=qs_rw.first().english)
+    return qs

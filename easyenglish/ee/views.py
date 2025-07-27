@@ -11,7 +11,7 @@ from django.views import generic
 from django.contrib.auth.mixins import LoginRequiredMixin
 from django.core.serializers import serialize
 from django.contrib.auth import logout, login
-from ee.general_purpose import text_analysisWord, alter_dic, export_excel, get_content, import_from_excel, set_sound_path
+from ee.general_purpose import find_english_word_qs, text_analysisWord, alter_dic, export_excel, get_content, import_from_excel, set_sound_path
 
 
 # Create your views here.
@@ -143,6 +143,26 @@ class WordDetailView(generic.DetailView):
             'default_image': settings.DEFAULT_USER_IMAGE,
         })
 
+        return context
+
+
+class SearchResultListView(generic.ListView):
+    template_name = 'Lists/search_result_list.html'
+    context_object_name = 'list_english'
+    model = models.English
+    paginate_by = 20
+
+    def get_queryset(self, **kwargs):
+        return find_english_word_qs(self.request.GET.get('search_query'))
+
+    def get_context_data(self, **kwargs):
+        # Call the base implementation first to get a context
+        context = super(SearchResultListView, self).get_context_data(**kwargs)
+
+        context['title'] = 'Результат поиска'
+        context['url_word'] = 'ee:word_detail'
+        context['url_create_word'] = 'ee:create_wordbook'
+        context['inf'] = 'Нет слов'
         return context
 
 
